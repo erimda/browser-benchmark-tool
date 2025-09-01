@@ -90,13 +90,26 @@ module BrowserBenchmarkTool
 
         all_results.concat(results)
 
-        # Small delay between repetitions
-        sleep(0.5) unless rep == repetitions - 1
+        # Check for degradation after each repetition for faster detection
+        if @degradation_engine.degradation_detected?
+          puts '⚠️  Degradation detected during level! Stopping benchmark.'
+          puts "Reason: #{@degradation_engine.stop_reason}"
+          break
+        end
+
+        # Much shorter delay between repetitions for better performance
+        sleep(0.01) unless rep == repetitions - 1
       end
 
       # Set baseline after first level
       if concurrency_level == @config.ramp[:levels].first
         @degradation_engine.set_baseline(@metrics_collector.calculate_baseline)
+        # Check for immediate degradation after baseline is set
+        if @degradation_engine.degradation_detected?
+          puts '⚠️  Degradation detected immediately after baseline! Stopping benchmark.'
+          puts "Reason: #{@degradation_engine.stop_reason}"
+          return all_results
+        end
       end
 
       all_results
@@ -140,7 +153,8 @@ module BrowserBenchmarkTool
 
     def cleanup_browser
       puts "\nCleaning up..."
-      # Browser cleanup is handled automatically
+      # Clean up browser automation resources
+      @browser_automation.cleanup
     end
 
     def should_stop_early?
@@ -154,12 +168,12 @@ module BrowserBenchmarkTool
       min_level_seconds = @config.workload[:min_level_seconds] || 30
 
       if level_duration < min_level_seconds
-        # If level ran too fast, wait a bit longer
+        # If level ran too fast, wait a bit longer but not too long
         wait_time = min_level_seconds - level_duration
-        [wait_time, 5].max # Minimum 5 seconds
+        [wait_time, 0.1].max # Very aggressive: minimum 0.1 seconds
       else
         # If level took longer than minimum, shorter wait
-        [level_duration * 0.1, 2].max # 10% of level time, minimum 2 seconds
+        [level_duration * 0.01, 0.1].max # Very aggressive: 1% of level time, minimum 0.1 seconds
       end
     end
   end

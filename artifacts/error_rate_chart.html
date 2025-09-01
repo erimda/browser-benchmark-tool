@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Error Rate vs Concurrency</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="error-rate-chart"></div>
+  <script>
+    var traces = [{"x":[1,1,2,2],"y":[0.0,0.0,0.0,100.0],"type":"scatter","mode":"lines+markers","name":"Error Rate (%)","line":{"color":"#e377c2"}}];
+    var layout = {"title":"Error Rate vs Concurrency","xaxis":{"title":"Concurrency Level"},"yaxis":{"title":"Error Rate (%)"},"showlegend":true};
+    Plotly.newPlot('error-rate-chart', traces, layout);
+  </script>
+</body>
+</html>

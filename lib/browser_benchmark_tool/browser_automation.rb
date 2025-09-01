@@ -18,14 +18,17 @@ module BrowserBenchmarkTool
       results = []
       threads = []
 
-      urls.each_with_index do |url, index|
-        break if index >= concurrency_level
-
+      # Create the requested number of concurrent tasks
+      concurrency_level.times do |i|
+        # Round-robin URL assignment to distribute load
+        url = urls[i % urls.length]
+        
         threads << Thread.new do
           run_single_task(url)
         end
       end
 
+      # Wait for all threads to complete
       threads.each(&:join)
 
       # Collect results from threads
@@ -34,6 +37,12 @@ module BrowserBenchmarkTool
       end
 
       results
+    end
+
+    def cleanup
+      @context&.close
+      @browser&.close
+      @playwright&.stop
     end
 
     private

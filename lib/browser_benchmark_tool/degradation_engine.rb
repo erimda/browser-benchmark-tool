@@ -19,7 +19,7 @@ module BrowserBenchmarkTool
       # Check latency degradation
       if check_latency_degradation(sample)
         @degradation_detected = true
-        @stop_reason = "p95 latency > #{@config.thresholds[:latency_multiplier_x]}× baseline"
+        @stop_reason = "p95 latency > #{@config.thresholds[:latency_threshold_x]}× baseline"
         return true
       end
 
@@ -74,7 +74,7 @@ module BrowserBenchmarkTool
 
       current_p95 = sample[:latency_ms][:p95]
       baseline_p95 = @baseline[:p95]
-      threshold = @config.thresholds[:latency_multiplier_x]
+      threshold = @config.thresholds[:latency_threshold_x]
 
       current_p95 > (baseline_p95 * threshold)
     end
