@@ -45,7 +45,7 @@ module BrowserBenchmarkTool
           attempted: results.length,
           successful: successful_tasks.length,
           failed: failed_tasks.length,
-          error_rate: failed_tasks.length.to_f / results.length
+          error_rate: results.length > 0 ? failed_tasks.length.to_f / results.length : 0.0
         },
         latency_ms: calculate_percentiles(durations),
         host: host_metrics,
@@ -95,9 +95,13 @@ module BrowserBenchmarkTool
     end
 
     def calculate_percentiles(values)
-      return { p50: 0, p90: 0, p95: 0, p99: 0 } if values.empty?
+      return { p50: 0, p90: 0, p95: 0, p99: 0 } if values.empty? || values.all?(&:zero?)
       
-      sorted = values.sort
+      # Filter out zero values and ensure we have valid numbers
+      valid_values = values.reject { |v| v.nil? || v.zero? || v.nan? }
+      return { p50: 0, p90: 0, p95: 0, p99: 0 } if valid_values.empty?
+      
+      sorted = valid_values.sort
       {
         p50: sorted[(sorted.length * 0.5).floor],
         p90: sorted[(sorted.length * 0.9).floor],

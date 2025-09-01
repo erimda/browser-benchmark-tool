@@ -12,11 +12,12 @@ module BrowserBenchmarkTool
       @config = config
       @samples = samples
       @degradation_engine = degradation_engine
-      @chart_generator = ChartGenerator.new(config, samples)
+      @chart_generator = ChartGenerator.new(config, samples) if config.output[:generate_charts]
     end
 
     def generate_summary
       msc = get_maximum_sustainable_concurrency
+      stop_reason = degradation_engine.degradation_detected? ? degradation_engine.stop_reason : 'No degradation detected'
       
       <<~MARKDOWN
         # Browser Benchmark Summary
@@ -31,17 +32,17 @@ module BrowserBenchmarkTool
         
         ## Results
         - **Maximum Sustainable Concurrency (MSC):** #{msc}
-        - **Stop Reason:** #{degradation_engine.stop_reason || 'No degradation detected'}
+        - **Stop Reason:** #{stop_reason}
         - **Total Levels Tested:** #{samples.length}
         
         ## Per-Level Metrics
         #{generate_per_level_table}
         
         ## Thresholds
-        - **Latency Multiplier:** #{config.thresholds[:latency_multiplier_x]}× baseline p95
-        - **CPU Threshold:** #{(config.thresholds[:cpu_utilization] * 100).round(1)}%
-        - **Memory Threshold:** #{(config.thresholds[:memory_utilization] * 100).round(1)}%
-        - **Error Rate Threshold:** #{(config.thresholds[:error_rate] * 100).round(1)}%
+        - **Latency Multiplier:** #{config.thresholds[:latency_threshold_x]}× baseline p95
+        - **CPU Threshold:** #{(config.thresholds[:cpu_threshold] * 100).round(1)}%
+        - **Memory Threshold:** #{(config.thresholds[:mem_threshold] * 100).round(1)}%
+        - **Error Rate Threshold:** #{(config.thresholds[:error_rate_threshold] * 100).round(1)}%
         
         ## Charts
         #{generate_charts_section}
@@ -116,7 +117,7 @@ module BrowserBenchmarkTool
       File.write(File.join(output_dir, 'metrics.csv'), export_csv)
       
       # Save charts if enabled
-      if config.output[:charts]
+      if config.output[:generate_charts] && @chart_generator
         @chart_generator.save_charts
       end
       
@@ -134,7 +135,7 @@ module BrowserBenchmarkTool
     private
 
     def generate_charts_section
-      return 'Charts disabled in configuration.' unless config.output[:charts]
+      return 'Charts disabled in configuration.' unless config.output[:generate_charts]
       
       <<~MARKDOWN
         Interactive charts have been generated:
