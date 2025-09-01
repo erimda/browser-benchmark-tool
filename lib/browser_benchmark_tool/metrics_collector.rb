@@ -19,7 +19,7 @@ module BrowserBenchmarkTool
       }
     end
 
-    def collect_process_metrics(process_names = ['chromium', 'chrome'])
+    def collect_process_metrics(_process_names = %w[chromium chrome])
       # Simulate process metrics for now
       [
         {
@@ -35,9 +35,9 @@ module BrowserBenchmarkTool
     def add_sample(level, results, host_metrics, process_metrics)
       successful_tasks = results.select { |r| r[:success] }
       failed_tasks = results.reject { |r| r[:success] }
-      
+
       durations = successful_tasks.map { |r| r[:duration_ms] || r[:duration] || 0 }
-      
+
       sample = {
         timestamp: Time.now.strftime('%Y-%m-%dT%H:%M:%S.%LZ'),
         level: level,
@@ -45,13 +45,13 @@ module BrowserBenchmarkTool
           attempted: results.length,
           successful: successful_tasks.length,
           failed: failed_tasks.length,
-          error_rate: results.length > 0 ? failed_tasks.length.to_f / results.length : 0.0
+          error_rate: results.length.positive? ? failed_tasks.length.to_f / results.length : 0.0
         },
         latency_ms: calculate_percentiles(durations),
         host: host_metrics,
         processes: process_metrics
       }
-      
+
       @samples << sample
       sample
     end
@@ -62,11 +62,11 @@ module BrowserBenchmarkTool
 
     def calculate_baseline
       return nil if @samples.empty?
-      
+
       # Use the first level (concurrency = 1) as baseline
       baseline_sample = @samples.find { |s| s[:level] == 1 }
       return nil unless baseline_sample
-      
+
       {
         p50: baseline_sample[:latency_ms][:p50],
         p95: baseline_sample[:latency_ms][:p95],
@@ -96,11 +96,11 @@ module BrowserBenchmarkTool
 
     def calculate_percentiles(values)
       return { p50: 0, p90: 0, p95: 0, p99: 0 } if values.empty? || values.all?(&:zero?)
-      
+
       # Filter out zero values and ensure we have valid numbers
       valid_values = values.reject { |v| v.nil? || v.zero? || v.nan? }
       return { p50: 0, p90: 0, p95: 0, p99: 0 } if valid_values.empty?
-      
+
       sorted = valid_values.sort
       {
         p50: sorted[(sorted.length * 0.5).floor],

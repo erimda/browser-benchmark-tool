@@ -46,7 +46,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
   describe '#generate_latency_chart' do
     it 'generates HTML chart for latency metrics' do
       chart_html = chart_generator.generate_latency_chart
-      
+
       expect(chart_html).to include('<html>')
       expect(chart_html).to include('<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>')
       expect(chart_html).to include('Latency vs Concurrency')
@@ -57,7 +57,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
 
     it 'includes chart data in JSON format' do
       chart_html = chart_generator.generate_latency_chart
-      
+
       expect(chart_html).to include('"x":[1,2,4]')
       expect(chart_html).to include('"y":[100,150,250]') # p50 values
       expect(chart_html).to include('"y":[200,350,600]') # p95 values
@@ -67,7 +67,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
   describe '#generate_resource_chart' do
     it 'generates HTML chart for CPU and memory usage' do
       chart_html = chart_generator.generate_resource_chart
-      
+
       expect(chart_html).to include('<html>')
       expect(chart_html).to include('Resource Usage vs Concurrency')
       expect(chart_html).to include('CPU Usage')
@@ -76,7 +76,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
 
     it 'includes resource data in JSON format' do
       chart_html = chart_generator.generate_resource_chart
-      
+
       expect(chart_html).to include('"x":[1,2,4]')
       expect(chart_html).to include('"y":[30.0,60.0,85.0]') # CPU percentages
       expect(chart_html).to include('"y":[40.0,50.0,75.0]') # Memory percentages
@@ -86,7 +86,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
   describe '#generate_error_rate_chart' do
     it 'generates HTML chart for error rates' do
       chart_html = chart_generator.generate_error_rate_chart
-      
+
       expect(chart_html).to include('<html>')
       expect(chart_html).to include('Error Rate vs Concurrency')
       expect(chart_html).to include('Error Rate (%)')
@@ -94,7 +94,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
 
     it 'includes error rate data in JSON format' do
       chart_html = chart_generator.generate_error_rate_chart
-      
+
       expect(chart_html).to include('"x":[1,2,4]')
       expect(chart_html).to include('"y":[0.0,10.0,10.0]') # Error rates as percentages
     end
@@ -103,7 +103,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
   describe '#generate_combined_chart' do
     it 'generates a comprehensive HTML chart with all metrics' do
       chart_html = chart_generator.generate_combined_chart
-      
+
       expect(chart_html).to include('<html>')
       expect(chart_html).to include('Browser Benchmark Results')
       expect(chart_html).to include('Latency (ms)')
@@ -113,7 +113,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
 
     it 'creates subplots for different metric types' do
       chart_html = chart_generator.generate_combined_chart
-      
+
       expect(chart_html).to include('"subplot":"xy"')
       expect(chart_html).to include('"subplot":"xy2"')
       expect(chart_html).to include('"subplot":"xy3"')
@@ -133,9 +133,9 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
 
     it 'saves all chart types to the output directory' do
       config.output[:dir] = output_dir
-      
+
       chart_generator.save_charts
-      
+
       expect(File.exist?(File.join(output_dir, 'latency_chart.html'))).to be true
       expect(File.exist?(File.join(output_dir, 'resource_chart.html'))).to be true
       expect(File.exist?(File.join(output_dir, 'error_rate_chart.html'))).to be true
@@ -144,9 +144,9 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
 
     it 'creates the output directory if it does not exist' do
       config.output[:dir] = './new_charts_dir'
-      
+
       chart_generator.save_charts
-      
+
       expect(Dir.exist?('./new_charts_dir')).to be true
       FileUtils.rm_rf('./new_charts_dir')
     end
@@ -155,7 +155,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
   describe '#extract_chart_data' do
     it 'extracts x and y values for charting' do
       data = chart_generator.extract_chart_data
-      
+
       expect(data[:levels]).to eq([1, 2, 4])
       expect(data[:p50_latency]).to eq([100, 150, 250])
       expect(data[:p95_latency]).to eq([200, 350, 600])
@@ -170,7 +170,7 @@ RSpec.describe BrowserBenchmarkTool::ChartGenerator do
       traces = [{ x: [1], y: [1], type: 'scatter' }]
       layout = { title: 'Test' }
       html = chart_generator.generate_html_template('Test Chart', 'test-chart', traces, layout)
-      
+
       expect(html).to include('<!DOCTYPE html>')
       expect(html).to include('<html>')
       expect(html).to include('<head>')

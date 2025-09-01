@@ -15,35 +15,35 @@ module BrowserBenchmarkTool
 
     def check_degradation(sample)
       return false if @degradation_detected
-      
+
       # Check latency degradation
       if check_latency_degradation(sample)
         @degradation_detected = true
         @stop_reason = "p95 latency > #{@config.thresholds[:latency_multiplier_x]}× baseline"
         return true
       end
-      
+
       # Check CPU degradation
       if check_cpu_degradation(sample)
         @degradation_detected = true
         @stop_reason = "CPU utilization > #{@config.thresholds[:cpu_utilization] * 100}%"
         return true
       end
-      
+
       # Check memory degradation
       if check_memory_degradation(sample)
         @degradation_detected = true
         @stop_reason = "Memory utilization > #{@config.thresholds[:memory_utilization] * 100}%"
         return true
       end
-      
+
       # Check error rate degradation
       if check_error_rate_degradation(sample)
         @degradation_detected = true
         @stop_reason = "Error rate > #{@config.thresholds[:error_rate] * 100}%"
         return true
       end
-      
+
       false
     end
 
@@ -51,13 +51,11 @@ module BrowserBenchmarkTool
       @degradation_detected
     end
 
-    def stop_reason
-      @stop_reason
-    end
+    attr_reader :stop_reason
 
     def get_maximum_sustainable_concurrency(samples)
       return 0 if samples.empty?
-      
+
       if @degradation_detected
         # Find the last level before degradation
         degraded_level = samples.last[:level]
@@ -73,29 +71,29 @@ module BrowserBenchmarkTool
 
     def check_latency_degradation(sample)
       return false unless @baseline && sample[:latency_ms][:p95]
-      
+
       current_p95 = sample[:latency_ms][:p95]
       baseline_p95 = @baseline[:p95]
       threshold = @config.thresholds[:latency_multiplier_x]
-      
+
       current_p95 > (baseline_p95 * threshold)
     end
 
     def check_cpu_degradation(sample)
       return false unless sample[:host][:cpu_usage]
-      
+
       sample[:host][:cpu_usage] > @config.thresholds[:cpu_utilization]
     end
 
     def check_memory_degradation(sample)
       return false unless sample[:host][:memory_usage]
-      
+
       sample[:host][:memory_usage] > @config.thresholds[:memory_utilization]
     end
 
     def check_error_rate_degradation(sample)
       return false unless sample[:tasks][:error_rate]
-      
+
       sample[:tasks][:error_rate] > @config.thresholds[:error_rate]
     end
   end

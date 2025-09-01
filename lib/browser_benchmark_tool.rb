@@ -16,6 +16,6 @@ require_relative 'browser_benchmark_tool/rate_limiter'
 # Main module for the Browser Benchmark Tool
 module BrowserBenchmarkTool
   class Error < StandardError; end
-  
+
   # Your code goes here...
 end

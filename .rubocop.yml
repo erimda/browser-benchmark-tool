@@ -3,7 +3,12 @@ require:
 
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 3.2
+  SuggestExtensions: false
+  Exclude:
+    - "vendor/**/*"
+    - "db/schema.rb"
+    - "node_modules/**/*"
+    - "spec/support/**/*"
 
 Style/Documentation:
   Enabled: false
@@ -11,16 +16,37 @@ Style/Documentation:
 Style/StringLiterals:
   EnforcedStyle: single_quotes
 
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
 Layout/LineLength:
   Max: 120
 
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/ClassLength:
+  Max: 150
+
 Metrics/BlockLength:
+  Max: 50
   Exclude:
-    - 'spec/**/*'
-    - 'Rakefile'
+    - "spec/**/*"
+
+RSpec/MultipleExpectations:
+  Max: 5
 
 RSpec/ExampleLength:
   Max: 20
 
-RSpec/MultipleExpectations:
-  Max: 5
+RSpec/DescribedClass:
+  Enabled: false
+
+RSpec/PredicateMatcher:
+  Enabled: false
+
+Capybara/RSpec/PredicateMatcher:
+  Enabled: false

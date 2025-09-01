@@ -12,10 +12,10 @@ module BrowserBenchmarkTool
     def allow_request?(domain)
       now = Time.now
       domain_times = @request_times[domain] || []
-      
+
       # Remove old requests outside the 1-second window
       domain_times.reject! { |time| now - time >= 1.0 }
-      
+
       # Check if we're under the rate limit
       if domain_times.length < @requests_per_second
         domain_times << now
@@ -38,4 +38,3 @@ module BrowserBenchmarkTool
     end
   end
 end
-

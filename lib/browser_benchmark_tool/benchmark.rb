@@ -19,12 +19,12 @@ module BrowserBenchmarkTool
     end
 
     def run
-      puts "Starting browser benchmark..."
+      puts 'Starting browser benchmark...'
       puts "Configuration: #{@config.workload[:mode]} mode, #{@config.workload[:engine]} engine"
       puts "Max runtime: #{@max_runtime_minutes} minutes"
-      
+
       @start_time = Time.now
-      
+
       begin
         run_benchmark_ramp
         generate_summary
@@ -37,28 +37,28 @@ module BrowserBenchmarkTool
 
     def run_benchmark_ramp
       puts "\nRunning benchmark ramp strategy: #{@config.ramp[:strategy]}"
-      
+
       @config.ramp[:levels].each do |level|
         break if should_stop_early?
-        
+
         puts "\n--- Level #{level} (Concurrency: #{level}) ---"
-        
+
         level_start_time = Time.now
         level_results = run_level(level)
         level_duration = Time.now - level_start_time
-        
+
         print_level_results(level, level_results, level_duration)
-        
+
         # Check for degradation
         if @degradation_engine.degradation_detected?
-          puts "⚠️  Degradation detected! Stopping benchmark."
+          puts '⚠️  Degradation detected! Stopping benchmark.'
           puts "Reason: #{@degradation_engine.stop_reason}"
           break
         end
-        
+
         # Adaptive wait time between levels
         wait_time = calculate_adaptive_wait_time(level_duration)
-        if wait_time > 0
+        if wait_time.positive?
           puts "Waiting #{wait_time.round(1)}s before next level..."
           sleep(wait_time)
         end
@@ -68,50 +68,50 @@ module BrowserBenchmarkTool
     def run_level(concurrency_level)
       urls = @config.workload[:urls]
       repetitions = @config.workload[:per_browser_repetitions] || 3
-      
+
       puts "Running #{concurrency_level} concurrent tasks with #{repetitions} repetitions each..."
-      
+
       all_results = []
-      
+
       repetitions.times do |rep|
         break if should_stop_early?
-        
+
         puts "  Repetition #{rep + 1}/#{repetitions}..."
-        
+
         # Run concurrent tasks
         results = @browser_automation.run_concurrent_tasks(urls, concurrency_level)
-        
+
         # Collect host and process metrics
         host_metrics = @metrics_collector.collect_host_metrics
         process_metrics = @metrics_collector.collect_process_metrics
-        
+
         # Collect metrics
         @metrics_collector.add_sample(concurrency_level, results, host_metrics, process_metrics)
-        
+
         all_results.concat(results)
-        
+
         # Small delay between repetitions
         sleep(0.5) unless rep == repetitions - 1
       end
-      
+
       # Set baseline after first level
       if concurrency_level == @config.ramp[:levels].first
         @degradation_engine.set_baseline(@metrics_collector.calculate_baseline)
       end
-      
+
       all_results
     end
 
-    def print_level_results(level, results, duration)
+    def print_level_results(_level, results, duration)
       successful = results.count { |r| r[:success] }
       failed = results.length - successful
-      
+
       avg_duration = results.sum { |r| r[:duration_ms] || 0 } / results.length.to_f
-      
+
       puts "  Results: #{successful} successful, #{failed} failed"
       puts "  Average duration: #{avg_duration.round(2)}ms"
       puts "  Level duration: #{duration.round(2)}s"
-      
+
       # Print safety stats
       safety_stats = @browser_automation.safety_manager.get_safety_stats
       puts "  Safety: #{safety_stats[:current_requests]}/#{@config.safety[:max_concurrent_requests]} concurrent, #{safety_stats[:total_requests]} total"
@@ -119,24 +119,22 @@ module BrowserBenchmarkTool
 
     def generate_summary
       puts "\n--- Benchmark Summary ---"
-      
+
       runtime = Time.now - @start_time
       puts "Total runtime: #{runtime.round(2)}s (#{(runtime / 60).round(2)} minutes)"
-      
-      if should_stop_early?
-        puts "⚠️  Benchmark stopped early due to time limit"
-      end
-      
+
+      puts '⚠️  Benchmark stopped early due to time limit' if should_stop_early?
+
       # Generate reports
       generate_reports
     end
 
     def generate_reports
       puts "\nGenerating reports..."
-      
+
       report_generator = ReportGenerator.new(@config, @metrics_collector.get_samples, @degradation_engine)
       report_generator.save_reports
-      
+
       puts "Reports saved to: #{@config.output[:dir]}"
     end
 
@@ -147,14 +145,14 @@ module BrowserBenchmarkTool
 
     def should_stop_early?
       return false unless @start_time
-      
+
       elapsed_minutes = (Time.now - @start_time) / 60
       elapsed_minutes >= @max_runtime_minutes
     end
 
     def calculate_adaptive_wait_time(level_duration)
       min_level_seconds = @config.workload[:min_level_seconds] || 30
-      
+
       if level_duration < min_level_seconds
         # If level ran too fast, wait a bit longer
         wait_time = min_level_seconds - level_duration

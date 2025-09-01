@@ -18,7 +18,7 @@ module BrowserBenchmarkTool
     option :ramp, type: :string, default: 'exp:1,2,4,8,16,32',
                   desc: 'Ramp strategy (exp:levels or linear:max or custom:1,3,5)'
     option :engine, type: :string, default: 'chromium',
-                  desc: 'Browser engine (chromium, firefox, webkit)'
+                    desc: 'Browser engine (chromium, firefox, webkit)'
     option :headless, type: :boolean, default: true,
                       desc: 'Run browsers in headless mode'
     option :reps_per_level, type: :numeric, default: 5,

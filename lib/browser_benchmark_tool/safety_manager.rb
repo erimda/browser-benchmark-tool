@@ -33,12 +33,12 @@ module BrowserBenchmarkTool
 
     def check_robots_txt(url)
       return true unless @config.safety[:robots_txt_respect]
-      
+
       domain = extract_domain(url)
       robots_content = fetch_robots_txt(domain)
-      
+
       return true unless robots_content
-      
+
       # Simple robots.txt parsing - check if URL is disallowed
       path = URI(url).path
       robots_content.lines.each do |line|
@@ -47,7 +47,7 @@ module BrowserBenchmarkTool
           return false if path.start_with?(disallowed_path)
         end
       end
-      
+
       true
     end
 
@@ -92,29 +92,24 @@ module BrowserBenchmarkTool
 
     def fetch_robots_txt(domain)
       return @robots_cache[domain] if @robots_cache.key?(domain)
-      
+
       begin
         robots_url = "https://#{domain}/robots.txt"
         uri = URI(robots_url)
-        
+
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = uri.scheme == 'https'
         http.open_timeout = 5
         http.read_timeout = 5
-        
+
         response = http.get(uri.path)
-        
-        if response.code == '200'
-          @robots_cache[domain] = response.body
-        else
-          @robots_cache[domain] = nil
-        end
-      rescue => e
+
+        @robots_cache[domain] = (response.body if response.code == '200')
+      rescue StandardError
         @robots_cache[domain] = nil
       end
-      
+
       @robots_cache[domain]
     end
   end
 end
-

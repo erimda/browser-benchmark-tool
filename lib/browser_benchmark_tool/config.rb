@@ -25,29 +25,29 @@ module BrowserBenchmarkTool
         per_browser_repetitions: 3,
         min_level_seconds: 30
       }
-      
+
       config.ramp = {
         strategy: 'exponential',
         levels: [1, 2, 4, 8, 16]
       }
-      
+
       config.thresholds = {
         latency_threshold_x: 2.0,
         cpu_threshold: 0.8,
         mem_threshold: 0.8,
         error_rate_threshold: 0.05
       }
-      
+
       config.sampling = {
         metrics_interval_seconds: 1
       }
-      
+
       config.output = {
         dir: './artifacts',
         max_runtime_minutes: 20,
         generate_charts: true
       }
-      
+
       config.safety = {
         robots_txt_respect: true,
         external_rate_limit_rps: 2,
@@ -55,7 +55,7 @@ module BrowserBenchmarkTool
         request_timeout_seconds: 30,
         max_total_requests: 100
       }
-      
+
       config
     end
 
@@ -72,7 +72,7 @@ module BrowserBenchmarkTool
 
     def self.from_cli_options(options)
       config = default
-      
+
       # Override with CLI options
       config.workload[:mode] = options[:mode] if options[:mode]
       config.workload[:engine] = options[:engine] if options[:engine]
@@ -80,34 +80,44 @@ module BrowserBenchmarkTool
       config.workload[:urls] = options[:urls] if options[:urls]
       config.workload[:per_browser_repetitions] = options[:reps_per_level] if options[:reps_per_level]
       config.workload[:min_level_seconds] = options[:level_min_seconds] if options[:level_min_seconds]
-      
-      config.ramp[:strategy] = options[:ramp] if options[:ramp]
-      
+
+      # Parse ramp strategy if provided
+      if options[:ramp]
+        ramp_config = parse_ramp_strategy(options[:ramp])
+        config.ramp[:strategy] = ramp_config[:strategy]
+        config.ramp[:levels] = ramp_config[:levels]
+      end
+
       config.thresholds[:latency_threshold_x] = options[:latency_threshold_x] if options[:latency_threshold_x]
       config.thresholds[:cpu_threshold] = options[:cpu_threshold] if options[:cpu_threshold]
       config.thresholds[:mem_threshold] = options[:mem_threshold] if options[:mem_threshold]
-      
+
       config.output[:dir] = options[:out_dir] if options[:out_dir]
-      
+
       config
     end
 
     def merge_cli_options(options)
       # Merge CLI options with existing config
-      self.workload[:mode] = options[:mode] if options[:mode]
-      self.workload[:engine] = options[:engine] if options[:engine]
-      self.workload[:headless] = options[:headless] if options[:headless]
-      self.workload[:urls] = options[:urls] if options[:urls]
-      self.workload[:per_browser_repetitions] = options[:reps_per_level] if options[:reps_per_level]
-      self.workload[:min_level_seconds] = options[:level_min_seconds] if options[:level_min_seconds]
-      
-      self.ramp[:strategy] = options[:ramp] if options[:ramp]
-      
-      self.thresholds[:latency_threshold_x] = options[:latency_threshold_x] if options[:latency_threshold_x]
-      self.thresholds[:cpu_threshold] = options[:cpu_threshold] if options[:cpu_threshold]
-      self.thresholds[:mem_threshold] = options[:mem_threshold] if options[:mem_threshold]
-      
-      self.output[:dir] = options[:out_dir] if options[:out_dir]
+      workload[:mode] = options[:mode] if options[:mode]
+      workload[:engine] = options[:engine] if options[:engine]
+      workload[:headless] = options[:headless] if options[:headless]
+      workload[:urls] = options[:urls] if options[:urls]
+      workload[:per_browser_repetitions] = options[:reps_per_level] if options[:reps_per_level]
+      workload[:min_level_seconds] = options[:level_min_seconds] if options[:level_min_seconds]
+
+      # Parse ramp strategy if provided
+      if options[:ramp]
+        ramp_config = self.class.parse_ramp_strategy(options[:ramp])
+        ramp[:strategy] = ramp_config[:strategy]
+        ramp[:levels] = ramp_config[:levels]
+      end
+
+      thresholds[:latency_threshold_x] = options[:latency_threshold_x] if options[:latency_threshold_x]
+      thresholds[:cpu_threshold] = options[:cpu_threshold] if options[:cpu_threshold]
+      thresholds[:mem_threshold] = options[:mem_threshold] if options[:mem_threshold]
+
+      output[:dir] = options[:out_dir] if options[:out_dir]
     end
 
     def to_yaml
@@ -124,13 +134,13 @@ module BrowserBenchmarkTool
     def self.parse_ramp_strategy(strategy_str)
       case strategy_str
       when /^exp:(.+)$/
-        levels = $1.split(',').map(&:to_i)
+        levels = ::Regexp.last_match(1).split(',').map(&:to_i)
         { strategy: 'exponential', levels: levels }
       when /^lin:(.+)$/
-        levels = $1.split(',').map(&:to_i)
+        levels = ::Regexp.last_match(1).split(',').map(&:to_i)
         { strategy: 'linear', levels: levels }
       when /^custom:(.+)$/
-        levels = $1.split(',').map(&:to_i)
+        levels = ::Regexp.last_match(1).split(',').map(&:to_i)
         { strategy: 'custom', levels: levels }
       else
         { strategy: 'exponential', levels: [1, 2, 4, 8, 16] }

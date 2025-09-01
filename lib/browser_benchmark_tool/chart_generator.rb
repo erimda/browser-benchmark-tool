@@ -14,7 +14,7 @@ module BrowserBenchmarkTool
 
     def generate_latency_chart
       data = extract_chart_data
-      
+
       traces = [
         {
           x: data[:levels],
@@ -54,7 +54,7 @@ module BrowserBenchmarkTool
 
     def generate_resource_chart
       data = extract_chart_data
-      
+
       traces = [
         {
           x: data[:levels],
@@ -86,7 +86,7 @@ module BrowserBenchmarkTool
 
     def generate_error_rate_chart
       data = extract_chart_data
-      
+
       traces = [
         {
           x: data[:levels],
@@ -110,7 +110,7 @@ module BrowserBenchmarkTool
 
     def generate_combined_chart
       data = extract_chart_data
-      
+
       traces = [
         # Latency subplot
         {
@@ -171,13 +171,13 @@ module BrowserBenchmarkTool
     def save_charts
       output_dir = config.output[:dir]
       FileUtils.mkdir_p(output_dir)
-      
+
       # Save individual charts
       File.write(File.join(output_dir, 'latency_chart.html'), generate_latency_chart)
       File.write(File.join(output_dir, 'resource_chart.html'), generate_resource_chart)
       File.write(File.join(output_dir, 'error_rate_chart.html'), generate_error_rate_chart)
       File.write(File.join(output_dir, 'combined_chart.html'), generate_combined_chart)
-      
+
       puts "Charts saved to: #{output_dir}"
     end
 
@@ -189,7 +189,7 @@ module BrowserBenchmarkTool
       cpu_usage = samples.map { |s| (s[:host][:cpu_usage] * 100).round(1) }
       memory_usage = samples.map { |s| (s[:host][:memory_usage] * 100).round(1) }
       error_rates = samples.map { |s| (s[:tasks][:error_rate] * 100).round(1) }
-      
+
       {
         levels: levels,
         p50_latency: p50_latency,
