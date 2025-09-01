@@ -33,3 +33,6 @@
 
 # OS generated files
 Thumbs.db
+
+# Local development files
+tasks.md

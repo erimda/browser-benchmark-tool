@@ -1,11 +1,15 @@
 source 'https://rubygems.org'
 
-ruby '3.2.0'
+ruby '3.3.6'
 
 # Add your gems here
 gem 'rake', '~> 13.0'
 gem 'rspec', '~> 3.12'
 gem 'pry', '~> 0.14'
+
+# CLI and configuration
+gem 'thor', '~> 1.3'
+gem 'yaml', '~> 0.2'
 
 group :development do
   gem 'rubocop', '~> 1.50'
