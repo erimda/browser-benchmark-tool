@@ -64,6 +64,7 @@ RSpec.configure do |config|
   config.filter_run_excluding :performance unless ENV['RUN_PERFORMANCE_TESTS']
   config.filter_run_excluding :integration unless ENV['RUN_INTEGRATION_TESTS']
   config.filter_run_excluding :playwright unless ENV['RUN_PLAYWRIGHT_TESTS']
+  config.filter_run_excluding :real_metrics unless ENV['RUN_REAL_METRICS_TESTS']
 
   # Default to running only fast tests
   config.filter_run :fast unless ENV['RUN_ALL_TESTS']

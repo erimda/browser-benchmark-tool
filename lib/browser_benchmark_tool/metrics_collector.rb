@@ -118,23 +118,15 @@ module BrowserBenchmarkTool
     end
 
     def collect_real_cpu_usage
-      # Read CPU usage from /proc/stat on Linux or use sys-proctable
-      if File.exist?('/proc/stat')
-        cpu_line = File.read('/proc/stat').lines.first
-        values = cpu_line.split[1..-1].map(&:to_i)
-        total = values.sum
-        idle = values[3]
-        usage = 1.0 - (idle.to_f / total)
-        [0.0, usage].max # Ensure non-negative
+      # Platform-specific CPU usage collection
+      case RUBY_PLATFORM
+      when /darwin/ # macOS
+        collect_macos_cpu_usage
+      when /linux/ # Linux
+        collect_linux_cpu_usage
       else
         # Fallback to sys-proctable if available
-        begin
-          require 'sys-proctable'
-          # This is a simplified approach - in a real implementation you'd want more sophisticated CPU monitoring
-          0.5 # Default fallback
-        rescue
-          0.5 # Final fallback
-        end
+        collect_fallback_cpu_usage
       end
     rescue StandardError => e
       puts "Failed to collect real CPU usage: #{e.message}" if ENV['DEBUG']
@@ -142,22 +134,15 @@ module BrowserBenchmarkTool
     end
 
     def collect_real_memory_usage
-      # Read memory usage from /proc/meminfo on Linux
-      if File.exist?('/proc/meminfo')
-        meminfo = File.read('/proc/meminfo')
-        total = meminfo.match(/MemTotal:\s+(\d+)/)&.[](1)&.to_i || 1
-        available = meminfo.match(/MemAvailable:\s+(\d+)/)&.[](1)&.to_i || 0
-        used = total - available
-        used.to_f / total
+      # Platform-specific memory usage collection
+      case RUBY_PLATFORM
+      when /darwin/ # macOS
+        collect_macos_memory_usage
+      when /linux/ # Linux
+        collect_linux_memory_usage
       else
         # Fallback to sys-proctable if available
-        begin
-          require 'sys-proctable'
-          # This is a simplified approach - in a real implementation you'd want more sophisticated memory monitoring
-          0.6 # Default fallback
-        rescue
-          0.6 # Final fallback
-        end
+        collect_fallback_memory_usage
       end
     rescue StandardError => e
       puts "Failed to collect real memory usage: #{e.message}" if ENV['DEBUG']
@@ -165,20 +150,15 @@ module BrowserBenchmarkTool
     end
 
     def collect_real_load_average
-      # Read load average from /proc/loadavg on Linux
-      if File.exist?('/proc/loadavg')
-        load_line = File.read('/proc/loadavg')
-        loads = load_line.split[0..2].map(&:to_f)
-        loads
+      # Platform-specific load average collection
+      case RUBY_PLATFORM
+      when /darwin/ # macOS
+        collect_macos_load_average
+      when /linux/ # Linux
+        collect_linux_load_average
       else
         # Fallback to sys-proctable if available
-        begin
-          require 'sys-proctable'
-          # This is a simplified approach - in a real implementation you'd want more sophisticated load monitoring
-          [1.0, 0.8, 0.6] # Default fallback
-        rescue
-          [1.0, 0.8, 0.6] # Final fallback
-        end
+        collect_fallback_load_average
       end
     rescue StandardError => e
       puts "Failed to collect real load average: #{e.message}" if ENV['DEBUG']
@@ -191,13 +171,14 @@ module BrowserBenchmarkTool
       process_metrics = []
       process_names.each do |name|
         Sys::ProcTable.ps.each do |process|
-          if process.comm&.include?(name)
+          # Improved process matching for macOS
+          if process.comm && matches_process_name?(process.comm, name)
             process_metrics << {
               pid: process.pid,
               comm: process.comm,
-              cpu_percent: process.pctcpu || 0.0,
+              cpu_percent: calculate_macos_cpu_percent(process),
               memory_mb: (process.rss || 0) / 1024.0,
-              vsize_mb: (process.size || 0) / 1024.0 / 1024.0
+              vsize_mb: (process.vsize || 0) / 1024.0 / 1024.0
             }
           end
         end
@@ -207,6 +188,166 @@ module BrowserBenchmarkTool
     rescue StandardError => e
       puts "Failed to collect real process metrics: #{e.message}" if ENV['DEBUG']
       collect_simulated_process_metrics(process_names)
+    end
+
+    def calculate_macos_cpu_percent(process)
+      # Calculate CPU percentage from total user and system time on macOS
+      if process.respond_to?(:total_user) && process.respond_to?(:total_system)
+        total_time = process.total_user + process.total_system
+        # Convert to percentage (this is a simplified calculation)
+        # In a real implementation, you'd want to track time deltas
+        [total_time / 1_000_000.0, 100.0].min # Cap at 100%
+      else
+        0.0
+      end
+    end
+
+    def matches_process_name?(process_comm, search_name)
+      # Handle macOS process naming conventions
+      case search_name.downcase
+      when 'chrome'
+        process_comm.downcase.include?('chrome') || 
+        process_comm.downcase.include?('google chrome')
+      when 'chromium'
+        process_comm.downcase.include?('chromium') || 
+        process_comm.downcase.include?('chrome')
+      when 'firefox'
+        process_comm.downcase.include?('firefox')
+      when 'safari'
+        process_comm.downcase.include?('safari')
+      else
+        process_comm.downcase.include?(search_name.downcase)
+      end
+    end
+
+    # Platform-specific methods for macOS
+    def collect_macos_cpu_usage
+      # Use 'top' command to get CPU usage on macOS
+      output = `top -l 1 -n 0 2>/dev/null`
+      if output && output.match(/CPU usage:\s+(\d+\.\d+)% user,\s+(\d+\.\d+)% sys,\s+(\d+\.\d+)% idle/)
+        user = $1.to_f
+        sys = $2.to_f
+        idle = $3.to_f
+        total = user + sys + idle
+        usage = (user + sys) / total
+        [0.0, usage].max # Ensure non-negative
+      else
+        collect_fallback_cpu_usage
+      end
+    end
+
+    def collect_macos_memory_usage
+      # Use 'vm_stat' command to get memory usage on macOS
+      output = `vm_stat 2>/dev/null`
+      if output
+        # Parse vm_stat output to calculate memory usage
+        lines = output.lines
+        total_pages = 0
+        free_pages = 0
+        
+        lines.each do |line|
+          if line.match(/Pages free:\s+(\d+)\./)
+            free_pages = $1.to_i
+          elsif line.match(/Pages active:\s+(\d+)\./)
+            total_pages += $1.to_i
+          elsif line.match(/Pages inactive:\s+(\d+)\./)
+            total_pages += $1.to_i
+          elsif line.match(/Pages wired down:\s+(\d+)\./)
+            total_pages += $1.to_i
+          elsif line.match(/Pages speculative:\s+(\d+)\./)
+            total_pages += $1.to_i
+          end
+        end
+        
+        if total_pages > 0
+          used_pages = total_pages - free_pages
+          used_pages.to_f / total_pages
+        else
+          collect_fallback_memory_usage
+        end
+      else
+        collect_fallback_memory_usage
+      end
+    end
+
+    def collect_macos_load_average
+      # Use 'top' command to get load average on macOS
+      output = `top -l 1 -n 0 2>/dev/null`
+      if output && output.match(/Load Avg:\s+([\d.]+),\s+([\d.]+),\s+([\d.]+)/)
+        [$1.to_f, $2.to_f, $3.to_f]
+      else
+        collect_fallback_load_average
+      end
+    end
+
+    # Platform-specific methods for Linux
+    def collect_linux_cpu_usage
+      # Read CPU usage from /proc/stat on Linux
+      if File.exist?('/proc/stat')
+        cpu_line = File.read('/proc/stat').lines.first
+        values = cpu_line.split[1..-1].map(&:to_i)
+        total = values.sum
+        idle = values[3]
+        usage = 1.0 - (idle.to_f / total)
+        [0.0, usage].max # Ensure non-negative
+      else
+        collect_fallback_cpu_usage
+      end
+    end
+
+    def collect_linux_memory_usage
+      # Read memory usage from /proc/meminfo on Linux
+      if File.exist?('/proc/meminfo')
+        meminfo = File.read('/proc/meminfo')
+        total = meminfo.match(/MemTotal:\s+(\d+)/)&.[](1)&.to_i || 1
+        available = meminfo.match(/MemAvailable:\s+(\d+)/)&.[](1)&.to_i || 0
+        used = total - available
+        used.to_f / total
+      else
+        collect_fallback_memory_usage
+      end
+    end
+
+    def collect_linux_load_average
+      # Read load average from /proc/loadavg on Linux
+      if File.exist?('/proc/loadavg')
+        load_line = File.read('/proc/loadavg')
+        loads = load_line.split[0..2].map(&:to_f)
+        loads
+      else
+        collect_fallback_load_average
+      end
+    end
+
+    # Fallback methods using sys-proctable
+    def collect_fallback_cpu_usage
+      begin
+        require 'sys-proctable'
+        # This is a simplified approach - in a real implementation you'd want more sophisticated CPU monitoring
+        0.5 # Default fallback
+      rescue
+        0.5 # Final fallback
+      end
+    end
+
+    def collect_fallback_memory_usage
+      begin
+        require 'sys-proctable'
+        # This is a simplified approach - in a real implementation you'd want more sophisticated memory monitoring
+        0.6 # Default fallback
+      rescue
+        0.6 # Final fallback
+      end
+    end
+
+    def collect_fallback_load_average
+      begin
+        require 'sys-proctable'
+        # This is a simplified approach - in a real implementation you'd want more sophisticated load monitoring
+        [1.0, 0.8, 0.6] # Default fallback
+      rescue
+        [1.0, 0.8, 0.6] # Final fallback
+      end
     end
 
     def collect_simulated_cpu_usage
