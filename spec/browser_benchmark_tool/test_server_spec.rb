@@ -49,20 +49,25 @@ RSpec.describe BrowserBenchmarkTool::TestServer do
       test_server.start
       sleep(0.5)
 
-      endpoints = [
+      # Test endpoints that should always return 200
+      reliable_endpoints = [
         '/health',
         '/ok',
         '/slow',
-        '/flaky',
         '/heavy',
         '/static/test.html'
       ]
 
-      endpoints.each do |endpoint|
+      reliable_endpoints.each do |endpoint|
         uri = URI("http://localhost:#{test_server.port}#{endpoint}")
         response = Net::HTTP.get_response(uri)
         expect(response.code).to eq('200')
       end
+
+      # Test /flaky endpoint separately (it's designed to sometimes return 500)
+      uri = URI("http://localhost:#{test_server.port}/flaky")
+      response = Net::HTTP.get_response(uri)
+      expect(['200', '500']).to include(response.code)
 
       test_server.stop
     end

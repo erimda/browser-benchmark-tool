@@ -40,8 +40,21 @@ module BrowserBenchmarkTool
 
     def stop
       @running = false
-      @server_socket&.close
-      @server_thread&.join
+      
+      # Close the server socket to stop accepting new connections
+      if @server_socket
+        @server_socket.close
+        @server_socket = nil
+      end
+      
+      # Wait for the server thread to finish
+      if @server_thread
+        @server_thread.join(2) # Wait up to 2 seconds
+        @server_thread = nil
+      end
+      
+      # Give the OS time to release the port
+      sleep(0.1)
     end
 
     def base_url
