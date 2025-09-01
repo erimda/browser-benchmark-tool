@@ -72,6 +72,7 @@ RSpec.configure do |config|
   config.filter_run_excluding :distributed unless ENV['RUN_DISTRIBUTED_TESTS']
   config.filter_run_excluding :custom_scripts unless ENV['RUN_CUSTOM_SCRIPTS_TESTS']
   config.filter_run_excluding :browser_mode unless ENV['RUN_BROWSER_MODE_TESTS']
+  config.filter_run_excluding :headed_browser unless ENV['RUN_HEADED_BROWSER_TESTS']
 
     # Default to running only fast tests
     config.filter_run :fast

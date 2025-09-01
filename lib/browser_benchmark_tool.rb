@@ -16,6 +16,7 @@ require_relative 'browser_benchmark_tool/crawl4ai_integration'
 require_relative 'browser_benchmark_tool/distributed_testing'
 require_relative 'browser_benchmark_tool/custom_workload_scripts'
 require_relative 'browser_benchmark_tool/browser_mode_options'
+require_relative 'browser_benchmark_tool/headed_browser_support'
 
 # Main module for the Browser Benchmark Tool
 module BrowserBenchmarkTool

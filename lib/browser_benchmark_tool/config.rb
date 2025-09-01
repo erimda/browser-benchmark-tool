@@ -4,7 +4,7 @@ require 'yaml'
 
 module BrowserBenchmarkTool
   class Config
-    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed, :custom_scripts, :browser_mode
+    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed, :custom_scripts, :browser_mode, :headed_browser
 
     def initialize
       @workload = {}
@@ -18,6 +18,7 @@ module BrowserBenchmarkTool
       @distributed = {}
       @custom_scripts = {}
       @browser_mode = {}
+      @headed_browser = {}
     end
 
     def self.default
@@ -111,6 +112,27 @@ module BrowserBenchmarkTool
         enable_process_pooling: false
       }
 
+      config.headed_browser = {
+        enabled: true,
+        display_mode: 'auto', # 'headed', 'headless', 'auto'
+        window_size: { width: 1920, height: 1080 },
+        viewport_size: { width: 1366, height: 768 },
+        fullscreen: false,
+        show_devtools: false,
+        slow_mo: 0,
+        timeout: 30,
+        screenshot_on_failure: true,
+        video_recording: false,
+        enable_visual_debugging: true,
+        browser_flags: ['--disable-web-security', '--disable-features=VizDisplayCompositor'],
+        user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        locale: 'en-US',
+        timezone: 'America/New_York',
+        geolocation: { latitude: 40.7128, longitude: -74.0060 },
+        permissions: ['geolocation', 'notifications', 'camera'],
+        extra_http_headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+      }
+
       config
     end
 
@@ -127,6 +149,7 @@ module BrowserBenchmarkTool
       config.distributed = hash['distributed'] || {}
       config.custom_scripts = hash['custom_scripts'] || {}
       config.browser_mode = hash['browser_mode'] || {}
+      config.headed_browser = hash['headed_browser'] || {}
       config
     end
 
@@ -192,7 +215,8 @@ module BrowserBenchmarkTool
         'crawl4ai' => crawl4ai,
         'distributed' => distributed,
         'custom_scripts' => custom_scripts,
-        'browser_mode' => browser_mode
+        'browser_mode' => browser_mode,
+        'headed_browser' => headed_browser
       }.to_yaml
     end
 
