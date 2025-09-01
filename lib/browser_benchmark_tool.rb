@@ -12,6 +12,8 @@ require_relative 'browser_benchmark_tool/chart_generator'
 require_relative 'browser_benchmark_tool/test_server'
 require_relative 'browser_benchmark_tool/safety_manager'
 require_relative 'browser_benchmark_tool/rate_limiter'
+require_relative 'browser_benchmark_tool/crawl4ai_integration'
+require_relative 'browser_benchmark_tool/distributed_testing'
 
 # Main module for the Browser Benchmark Tool
 module BrowserBenchmarkTool

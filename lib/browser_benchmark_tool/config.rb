@@ -4,7 +4,7 @@ require 'yaml'
 
 module BrowserBenchmarkTool
   class Config
-    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak
+    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed
 
     def initialize
       @workload = {}
@@ -14,6 +14,8 @@ module BrowserBenchmarkTool
       @output = {}
       @safety = {}
       @memory_leak = {}
+      @crawl4ai = {}
+      @distributed = {}
     end
 
     def self.default
@@ -64,6 +66,26 @@ module BrowserBenchmarkTool
         max_memory_growth_percent: 20
       }
 
+      config.crawl4ai = {
+        enabled: false,
+        api_key: nil,
+        max_pages_per_site: 10,
+        follow_links: true,
+        extract_content: true,
+        respect_robots_txt: true,
+        api_endpoint: 'https://api.crawl4ai.com'
+      }
+
+      config.distributed = {
+        enabled: false,
+        nodes: [],
+        coordinator_port: 9000,
+        load_balancing: 'round_robin',
+        health_check_interval: 30,
+        failover_enabled: false,
+        node_weights: {}
+      }
+
       config
     end
 
@@ -76,6 +98,8 @@ module BrowserBenchmarkTool
       config.output = hash['output'] || {}
       config.safety = hash['safety'] || {}
       config.memory_leak = hash['memory_leak'] || {}
+      config.crawl4ai = hash['crawl4ai'] || {}
+      config.distributed = hash['distributed'] || {}
       config
     end
 
@@ -137,7 +161,9 @@ module BrowserBenchmarkTool
         'sampling' => sampling,
         'output' => output,
         'safety' => safety,
-        'memory_leak' => memory_leak
+        'memory_leak' => memory_leak,
+        'crawl4ai' => crawl4ai,
+        'distributed' => distributed
       }.to_yaml
     end
 
