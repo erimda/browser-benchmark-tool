@@ -4,7 +4,7 @@ require 'yaml'
 
 module BrowserBenchmarkTool
   class Config
-    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed
+    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed, :custom_scripts
 
     def initialize
       @workload = {}
@@ -16,6 +16,7 @@ module BrowserBenchmarkTool
       @memory_leak = {}
       @crawl4ai = {}
       @distributed = {}
+      @custom_scripts = {}
     end
 
     def self.default
@@ -86,6 +87,15 @@ module BrowserBenchmarkTool
         node_weights: {}
       }
 
+      config.custom_scripts = {
+        enabled: false,
+        script_path: './scripts/custom_workload.rb',
+        script_timeout: 30,
+        allow_external_scripts: false,
+        script_parameters: {},
+        validation_rules: ['url_format', 'safety_checks']
+      }
+
       config
     end
 
@@ -100,6 +110,7 @@ module BrowserBenchmarkTool
       config.memory_leak = hash['memory_leak'] || {}
       config.crawl4ai = hash['crawl4ai'] || {}
       config.distributed = hash['distributed'] || {}
+      config.custom_scripts = hash['custom_scripts'] || {}
       config
     end
 
@@ -163,7 +174,8 @@ module BrowserBenchmarkTool
         'safety' => safety,
         'memory_leak' => memory_leak,
         'crawl4ai' => crawl4ai,
-        'distributed' => distributed
+        'distributed' => distributed,
+        'custom_scripts' => custom_scripts
       }.to_yaml
     end
 
