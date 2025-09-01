@@ -4,7 +4,7 @@ require 'yaml'
 
 module BrowserBenchmarkTool
   class Config
-    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed, :custom_scripts
+    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak, :crawl4ai, :distributed, :custom_scripts, :browser_mode
 
     def initialize
       @workload = {}
@@ -17,6 +17,7 @@ module BrowserBenchmarkTool
       @crawl4ai = {}
       @distributed = {}
       @custom_scripts = {}
+      @browser_mode = {}
     end
 
     def self.default
@@ -96,6 +97,20 @@ module BrowserBenchmarkTool
         validation_rules: ['url_format', 'safety_checks']
       }
 
+      config.browser_mode = {
+        mode: 'context', # 'context' or 'process'
+        context_pool_size: 5,
+        process_limit: 3,
+        context_reuse: true,
+        process_isolation: false,
+        memory_per_context: 100,
+        memory_per_process: 500,
+        context_timeout: 30,
+        process_timeout: 60,
+        enable_context_pooling: true,
+        enable_process_pooling: false
+      }
+
       config
     end
 
@@ -111,6 +126,7 @@ module BrowserBenchmarkTool
       config.crawl4ai = hash['crawl4ai'] || {}
       config.distributed = hash['distributed'] || {}
       config.custom_scripts = hash['custom_scripts'] || {}
+      config.browser_mode = hash['browser_mode'] || {}
       config
     end
 
@@ -175,7 +191,8 @@ module BrowserBenchmarkTool
         'memory_leak' => memory_leak,
         'crawl4ai' => crawl4ai,
         'distributed' => distributed,
-        'custom_scripts' => custom_scripts
+        'custom_scripts' => custom_scripts,
+        'browser_mode' => browser_mode
       }.to_yaml
     end
 

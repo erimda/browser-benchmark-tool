@@ -71,6 +71,7 @@ RSpec.configure do |config|
   config.filter_run_excluding :crawl4ai unless ENV['RUN_CRAWL4AI_TESTS']
   config.filter_run_excluding :distributed unless ENV['RUN_DISTRIBUTED_TESTS']
   config.filter_run_excluding :custom_scripts unless ENV['RUN_CUSTOM_SCRIPTS_TESTS']
+  config.filter_run_excluding :browser_mode unless ENV['RUN_BROWSER_MODE_TESTS']
 
     # Default to running only fast tests
     config.filter_run :fast
