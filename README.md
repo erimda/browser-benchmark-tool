@@ -271,7 +271,7 @@ Choose between context and process modes for optimal performance:
 
 ```yaml
 browser_mode:
-  mode: context  # 'context' or 'process'
+  mode: context # 'context' or 'process'
   context_pool_size: 5
   process_limit: 3
   enable_context_pooling: true
@@ -285,7 +285,7 @@ Visual debugging and display mode management:
 ```yaml
 headed_browser:
   enabled: true
-  display_mode: auto  # 'headed', 'headless', 'auto'
+  display_mode: auto # 'headed', 'headless', 'auto'
   window_size: { width: 1920, height: 1080 }
   viewport_size: { width: 1366, height: 768 }
   screenshot_on_failure: true
@@ -306,36 +306,42 @@ headed_browser:
 The Browser Benchmark Tool provides a complete solution for web application performance testing:
 
 ### 🎯 **Core Benchmarking**
+
 - Performance testing with multiple ramp strategies
 - Real-time metrics collection and analysis
 - Comprehensive reporting and visualization
 - Safety mechanisms and rate limiting
 
 ### 🔍 **Advanced Monitoring**
+
 - Memory leak detection and prevention
 - System resource monitoring (CPU, memory, load)
 - Performance degradation detection
 - Adaptive timing and early termination
 
 ### 🌐 **Web Intelligence**
+
 - Automated web crawling and link discovery
 - Content extraction and analysis
 - Robots.txt compliance and respect
 - Dynamic workload generation
 
 ### 🚀 **Scalability Features**
+
 - Distributed testing across multiple nodes
 - Load balancing and failover
 - Health monitoring and performance tracking
 - Bottleneck identification and analysis
 
 ### 🛠️ **Development Tools**
+
 - Custom workload script execution
 - Secure sandboxed environment
 - Built-in script templates
 - Visual debugging and headed browser support
 
 ### 📱 **Testing Capabilities**
+
 - Browser context vs process mode options
 - Mobile device emulation
 - Accessibility testing support
