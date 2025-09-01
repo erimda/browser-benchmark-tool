@@ -9,14 +9,20 @@ module BrowserBenchmarkTool
   class BrowserAutomation
     attr_reader :config, :safety_manager
 
-    def initialize(config)
-      @config = config
-      @safety_manager = SafetyManager.new(config)
-    end
+      def initialize(config)
+    @config = config
+    @safety_manager = SafetyManager.new(config)
+    @context_pool = []
+    @context_pool_mutex = Mutex.new
+    @max_context_pool_size = config.workload[:max_context_pool_size] || 10
+  end
 
     def run_concurrent_tasks(urls, concurrency_level)
       # Handle empty URL list
       return [] if urls.empty?
+
+      # Prewarm context pool for better performance
+      prewarm_context_pool(concurrency_level)
 
       results = []
       threads = []
@@ -43,6 +49,12 @@ module BrowserBenchmarkTool
     end
 
   def cleanup
+    # Close all contexts in the pool
+    @context_pool_mutex.synchronize do
+      @context_pool.each(&:close)
+      @context_pool.clear
+    end
+    
     @browser&.close
     @execution&.stop
   end
@@ -115,12 +127,56 @@ module BrowserBenchmarkTool
     end
   end
 
-  def context
-    if playwright_available?
-      # Create a new context for each request to ensure isolation
+      def context
+      if playwright_available?
+        # Try to get context from pool first
+        context = get_context_from_pool
+        
+        if context
+          context
+        else
+          # Create new context if pool is empty
+          create_new_context
+        end
+      end
+    end
+
+    def get_context_from_pool
+      @context_pool_mutex.synchronize do
+        @context_pool.shift
+      end
+    end
+
+    def return_context_to_pool(context)
+      @context_pool_mutex.synchronize do
+        if @context_pool.length < @max_context_pool_size
+          @context_pool << context
+        else
+          # Pool is full, close the context
+          context.close
+        end
+      end
+    end
+
+    def create_new_context
       browser.new_context
     end
-  end
+
+    def prewarm_context_pool(count = nil)
+      count ||= @max_context_pool_size
+      count = [count, @max_context_pool_size].min
+      
+      @context_pool_mutex.synchronize do
+        current_pool_size = @context_pool.length
+        needed_contexts = count - current_pool_size
+        
+        if needed_contexts > 0
+          needed_contexts.times do
+            @context_pool << create_new_context
+          end
+        end
+      end
+    end
 
 
 
@@ -175,7 +231,8 @@ module BrowserBenchmarkTool
 
     def run_real_playwright_actions(url)
       # Use real Playwright browser automation
-      page = context.new_page
+      current_context = context
+      page = current_context.new_page
       
       begin
         # Set timeout for navigation - use shorter timeout for tests
@@ -191,8 +248,6 @@ module BrowserBenchmarkTool
         
         # Wait for page to load
         page.wait_for_load_state(state: 'networkidle')
-        
-
         
         # Get page metrics
         page_metrics = {
@@ -227,6 +282,8 @@ module BrowserBenchmarkTool
         }
       ensure
         page.close
+        # Return context to pool for reuse
+        return_context_to_pool(current_context)
       end
     end
 
