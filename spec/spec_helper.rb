@@ -60,23 +60,15 @@ RSpec.configure do |config|
   end
 
   # Filter tests by type
-  config.filter_run_excluding :slow unless ENV['RUN_SLOW_TESTS']
-  config.filter_run_excluding :performance unless ENV['RUN_PERFORMANCE_TESTS']
-  config.filter_run_excluding :integration unless ENV['RUN_INTEGRATION_TESTS']
-  config.filter_run_excluding :playwright unless ENV['RUN_PLAYWRIGHT_TESTS']
-  config.filter_run_excluding :real_metrics unless ENV['RUN_REAL_METRICS_TESTS']
+  unless ENV['RUN_ALL_TESTS']
+    config.filter_run_excluding :slow unless ENV['RUN_SLOW_TESTS']
+    config.filter_run_excluding :performance unless ENV['RUN_PERFORMANCE_TESTS']
+    config.filter_run_excluding :integration unless ENV['RUN_INTEGRATION_TESTS']
+    config.filter_run_excluding :playwright unless ENV['RUN_PLAYWRIGHT_TESTS']
+    config.filter_run_excluding :real_metrics unless ENV['RUN_REAL_METRICS_TESTS']
 
-  # Default to running only fast tests
-  config.filter_run :fast unless ENV['RUN_ALL_TESTS']
-
-  # Run all tests if explicitly requested
-  if ENV['RUN_ALL_TESTS']
-    config.filter_run_excluding :fast
-    config.filter_run_excluding :slow
-    config.filter_run_excluding :performance
-    config.filter_run_excluding :integration
-    config.filter_run_excluding :component
-    config.filter_run_excluding :playwright
+    # Default to running only fast tests
+    config.filter_run :fast
   end
 end
 

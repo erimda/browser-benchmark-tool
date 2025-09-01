@@ -11,7 +11,7 @@ RSpec.describe BrowserBenchmarkTool::Benchmark do
         mode: 'playwright',
         engine: 'chromium',
         headless: true,
-        urls: ['http://localhost:8080/ok'], # Use local test server
+        urls: [], # Will be set dynamically after test server starts
         per_browser_repetitions: 1, # Reduced from 2
         min_level_seconds: 1 # Reduced from 5
       }
@@ -41,7 +41,7 @@ RSpec.describe BrowserBenchmarkTool::Benchmark do
   end
 
   let(:benchmark) { described_class.new(config) }
-  let(:test_server) { BrowserBenchmarkTool::TestServer.new(8080) }
+  let(:test_server) { BrowserBenchmarkTool::TestServer.new(config) }
 
   before do
     # Clean up test artifacts
@@ -49,6 +49,13 @@ RSpec.describe BrowserBenchmarkTool::Benchmark do
     # Start test server
     test_server.start
     sleep(0.1) # Brief wait for server to start
+    
+    # Set URLs dynamically using test server's actual port
+    config.workload[:urls] = [
+      "#{test_server.base_url}/ok",
+      "#{test_server.base_url}/slow",
+      "#{test_server.base_url}/heavy"
+    ]
   end
 
   after do

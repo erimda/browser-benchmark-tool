@@ -15,6 +15,9 @@ module BrowserBenchmarkTool
     end
 
     def run_concurrent_tasks(urls, concurrency_level)
+      # Handle empty URL list
+      return [] if urls.empty?
+
       results = []
       threads = []
 
