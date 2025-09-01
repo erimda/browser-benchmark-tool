@@ -15,11 +15,10 @@ gem 'yaml', '~> 0.2'
 
 # Browser automation and system monitoring
 gem 'json', '~> 2.6'
-gem 'playwright', '~> 0.1.1'
+gem 'playwright-ruby-client', '~> 1.55'
 gem 'sys-proctable', '~> 1.2'
 
-# Web server for testing
-gem 'sinatra', '~> 3.0'
+
 
 group :development do
   gem 'rubocop', '~> 1.50'

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Browser Benchmark Results</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="combined-chart"></div>
+  <script>
+    var traces = [{"x":[1,1,2,2],"y":[816.11,623.84,502.25,437.59],"type":"scatter","mode":"lines+markers","name":"P95 Latency","subplot":"xy","line":{"color":"#ff7f0e"}},{"x":[1,1,2,2],"y":[40.0,49.9,23.9,37.4],"type":"scatter","mode":"lines+markers","name":"CPU Usage","subplot":"xy2","line":{"color":"#2ca02c"}},{"x":[1,1,2,2],"y":[46.7,49.7,43.4,39.2],"type":"scatter","mode":"lines+markers","name":"Memory Usage","subplot":"xy2","line":{"color":"#9467bd"}},{"x":[1,1,2,2],"y":[0.0,0.0,0.0,0.0],"type":"scatter","mode":"lines+markers","name":"Error Rate","subplot":"xy3","line":{"color":"#e377c2"}}];
+    var layout = {"title":"Browser Benchmark Results","grid":{"rows":3,"columns":1,"pattern":"independent"},"xaxis":{"title":"Concurrency Level"},"yaxis":{"title":"Latency (ms)"},"xaxis2":{"title":"Concurrency Level"},"yaxis2":{"title":"Resource Usage (%)"},"xaxis3":{"title":"Concurrency Level"},"yaxis3":{"title":"Error Rate (%)"},"showlegend":true};
+    Plotly.newPlot('combined-chart', traces, layout);
+  </script>
+</body>
+</html>

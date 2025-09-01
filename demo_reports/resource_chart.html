@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Resource Usage vs Concurrency</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="resource-chart"></div>
+  <script>
+    var traces = [{"x":[1,1,2,2],"y":[40.0,49.9,23.9,37.4],"type":"scatter","mode":"lines+markers","name":"CPU Usage","line":{"color":"#2ca02c"}},{"x":[1,1,2,2],"y":[46.7,49.7,43.4,39.2],"type":"scatter","mode":"lines+markers","name":"Memory Usage","line":{"color":"#9467bd"}}];
+    var layout = {"title":"Resource Usage vs Concurrency","xaxis":{"title":"Concurrency Level"},"yaxis":{"title":"Usage (%)"},"showlegend":true};
+    Plotly.newPlot('resource-chart', traces, layout);
+  </script>
+</body>
+</html>

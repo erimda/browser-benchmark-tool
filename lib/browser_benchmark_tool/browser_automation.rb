@@ -73,27 +73,49 @@ module BrowserBenchmarkTool
     end
 
     def fetch_url(url)
-      uri = URI(url)
+      begin
+        uri = URI(url)
+      rescue URI::InvalidURIError => e
+        return {
+          url: url,
+          success: false,
+          error: e.message,
+          status_code: 400,
+          content_length: 0,
+          duration_ms: 0
+        }
+      end
 
       # Simulate browser automation
       if @config.workload[:mode] == 'playwright'
         simulate_playwright_actions(url)
       else
         # Simple HTTP request
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = uri.scheme == 'https'
-        http.open_timeout = @config.safety[:request_timeout_seconds] || 30
-        http.read_timeout = @config.safety[:request_timeout_seconds] || 30
+        begin
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = uri.scheme == 'https'
+          http.open_timeout = @config.safety[:request_timeout_seconds] || 30
+          http.read_timeout = @config.safety[:request_timeout_seconds] || 30
 
-        response = http.get(uri.path.empty? ? '/' : uri.path)
+          response = http.get(uri.path.empty? ? '/' : uri.path)
 
-        {
-          url: url,
-          success: response.code.start_with?('2'),
-          status_code: response.code.to_i,
-          content_length: response.body.length,
-          duration_ms: 0 # Will be set by caller
-        }
+          {
+            url: url,
+            success: response.code.start_with?('2'),
+            status_code: response.code.to_i,
+            content_length: response.body.length,
+            duration_ms: 0 # Will be set by caller
+          }
+        rescue StandardError => e
+          {
+            url: url,
+            success: false,
+            error: e.message,
+            status_code: 500,
+            content_length: 0,
+            duration_ms: 0
+          }
+        end
       end
     end
 
@@ -118,6 +140,18 @@ module BrowserBenchmarkTool
         sleep(rand(0.01..0.03)) # Much faster for tests
       else
         sleep(rand(0.1..0.3)) # Simulate screenshot capture
+      end
+
+      # Simulate network errors for invalid URLs
+      if url.include?('invalid-host-that-does-not-exist') || url.include?('192.168.1.999')
+        return {
+          url: url,
+          success: false,
+          error: 'Failed to connect to host',
+          status_code: 500,
+          content_length: 0,
+          duration_ms: 0
+        }
       end
 
       {

@@ -15,12 +15,14 @@ A Ruby-based tool for benchmarking browser performance with comprehensive report
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/erimda/browser-benchmark-tool.git
 cd browser-benchmark-tool
 ```
 
 2. Install dependencies:
+
 ```bash
 bundle install
 ```
@@ -28,11 +30,13 @@ bundle install
 ## Quick Start
 
 1. **Initialize Configuration**:
+
 ```bash
 bundle exec exe/bench-browsers init
 ```
 
 2. **Run a Simple Benchmark**:
+
 ```bash
 bundle exec exe/bench-browsers benchmark \
   --urls https://example.com \
@@ -106,6 +110,7 @@ safety:
 The tool generates comprehensive reports in multiple formats:
 
 ### 1. **Summary Report** (`summary.md`)
+
 - Human-readable overview of the benchmark
 - Configuration details and results summary
 - Maximum Sustainable Concurrency (MSC) calculation
@@ -113,15 +118,18 @@ The tool generates comprehensive reports in multiple formats:
 - Links to interactive charts
 
 ### 2. **Raw Data** (`metrics.jsonl`)
+
 - Detailed JSON data for each sample
 - Includes timestamps, latency percentiles, host metrics, process info
 - Perfect for custom analysis or importing into other tools
 
 ### 3. **CSV Data** (`metrics.csv`)
+
 - Tabular format for spreadsheet analysis
 - Easy to import into Excel, Google Sheets, or data analysis tools
 
 ### 4. **Interactive Charts** (HTML files)
+
 - **Latency Chart**: Shows p50, p95, p99 latency vs concurrency
 - **Resource Chart**: CPU and memory usage vs concurrency
 - **Error Rate Chart**: Error rates vs concurrency
@@ -130,6 +138,7 @@ The tool generates comprehensive reports in multiple formats:
 ## Example Workflows
 
 ### Basic Performance Test
+
 ```bash
 # Test a single URL with exponential ramping
 bundle exec exe/bench-browsers benchmark \
@@ -141,6 +150,7 @@ bundle exec exe/bench-browsers benchmark \
 ```
 
 ### Load Testing
+
 ```bash
 # Test multiple URLs with custom concurrency levels
 bundle exec exe/bench-browsers benchmark \
@@ -152,6 +162,7 @@ bundle exec exe/bench-browsers benchmark \
 ```
 
 ### Quick Development Test
+
 ```bash
 # Fast test with minimal configuration
 bundle exec exe/bench-browsers benchmark \
@@ -202,6 +213,7 @@ The tool includes several safety mechanisms:
 ## Development
 
 ### Running Tests
+
 ```bash
 # Run all tests
 bundle exec rspec
@@ -214,6 +226,7 @@ bundle exec rspec --format progress
 ```
 
 ### Code Quality
+
 ```bash
 # Run linting
 bundle exec rubocop
@@ -226,7 +239,9 @@ bundle exec rubocop lib/browser_benchmark_tool/benchmark.rb
 ```
 
 ### Test Performance
+
 The test suite is optimized for fast execution:
+
 - **Before**: ~50 minutes runtime
 - **After**: ~3 minutes runtime (94% improvement)
 - All tests passing (88 examples, 0 failures, 1 pending)
@@ -250,6 +265,7 @@ The test suite is optimized for fast execution:
 ## Support
 
 For issues, questions, or contributions, please:
+
 1. Check the existing issues on GitHub
 2. Create a new issue with detailed information
 3. Include benchmark configuration and error logs
