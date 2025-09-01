@@ -11,6 +11,11 @@ gem 'pry', '~> 0.14'
 gem 'thor', '~> 1.3'
 gem 'yaml', '~> 0.2'
 
+# Browser automation and system monitoring
+gem 'playwright', '~> 0.1.1'
+gem 'sys-proctable', '~> 1.2'
+gem 'json', '~> 2.6'
+
 group :development do
   gem 'rubocop', '~> 1.50'
   gem 'rubocop-rspec', '~> 2.20'
