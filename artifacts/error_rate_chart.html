@@ -7,7 +7,7 @@
 <body>
   <div id="error-rate-chart"></div>
   <script>
-    var traces = [{"x":[1,2],"y":[0.0,0.0],"type":"scatter","mode":"lines+markers","name":"Error Rate (%)","line":{"color":"#e377c2"}}];
+    var traces = [{"x":[1,1,2,2,4,4,8,8,16,16,32,32],"y":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"type":"scatter","mode":"lines+markers","name":"Error Rate (%)","line":{"color":"#e377c2"}}];
     var layout = {"title":"Error Rate vs Concurrency","xaxis":{"title":"Concurrency Level"},"yaxis":{"title":"Error Rate (%)"},"showlegend":true};
     Plotly.newPlot('error-rate-chart', traces, layout);
   </script>

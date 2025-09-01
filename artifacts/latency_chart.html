@@ -7,7 +7,7 @@
 <body>
   <div id="latency-chart"></div>
   <script>
-    var traces = [{"x":[1,2],"y":[2667.6549999999997,1801.9650000000001],"type":"scatter","mode":"lines+markers","name":"p50","line":{"color":"#1f77b4"}},{"x":[1,2],"y":[2667.6549999999997,2428.954],"type":"scatter","mode":"lines+markers","name":"p95","line":{"color":"#ff7f0e"}},{"x":[1,2],"y":[2667.6549999999997,2428.954],"type":"scatter","mode":"lines+markers","name":"p99","line":{"color":"#d62728"}}];
+    var traces = [{"x":[1,1,2,2,4,4,8,8,16,16,32,32],"y":[1381.11,531.93,816.71,736.31,461.27,604.23,617.93,725.17,597.07,846.02,682.8,790.01],"type":"scatter","mode":"lines+markers","name":"p50","line":{"color":"#1f77b4"}},{"x":[1,1,2,2,4,4,8,8,16,16,32,32],"y":[1381.11,531.93,816.71,736.31,461.27,604.23,617.93,725.17,597.07,846.02,682.8,790.01],"type":"scatter","mode":"lines+markers","name":"p95","line":{"color":"#ff7f0e"}},{"x":[1,1,2,2,4,4,8,8,16,16,32,32],"y":[1381.11,531.93,816.71,736.31,461.27,604.23,617.93,725.17,597.07,846.02,682.8,790.01],"type":"scatter","mode":"lines+markers","name":"p99","line":{"color":"#d62728"}}];
     var layout = {"title":"Latency vs Concurrency","xaxis":{"title":"Concurrency Level"},"yaxis":{"title":"Latency (ms)"},"showlegend":true};
     Plotly.newPlot('latency-chart', traces, layout);
   </script>

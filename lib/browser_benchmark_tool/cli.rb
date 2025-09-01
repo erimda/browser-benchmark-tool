@@ -51,7 +51,9 @@ module BrowserBenchmarkTool
     def load_config
       if File.exist?(options[:config])
         yaml_config = YAML.load_file(options[:config])
-        Config.from_hash(yaml_config).merge_cli_options(options)
+        config = Config.from_hash(yaml_config)
+        config.merge_cli_options(options)
+        config
       else
         Config.from_cli_options(options)
       end

@@ -1,128 +1,119 @@
 # frozen_string_literal: true
 
-require 'json'
 require 'net/http'
 require 'uri'
+require 'json'
+require_relative 'safety_manager'
 
 module BrowserBenchmarkTool
   class BrowserAutomation
+    attr_reader :config, :safety_manager
+
     def initialize(config)
       @config = config
-      @contexts = []
+      @safety_manager = SafetyManager.new(config)
     end
 
-    def setup
-      puts "Setting up browser automation (simulated mode)..."
-      # In a real implementation, this would initialize Playwright
-    end
-
-    def create_context
-      context_id = @contexts.length
-      @contexts << { id: context_id }
-      { id: context_id }
-    end
-
-    def run_task(context, url, actions = [])
-      start_time = Time.now
-      
-      begin
-        # Simulate browser navigation
-        uri = URI(url)
-        response = Net::HTTP.get_response(uri)
-        
-        # Simulate action execution time
-        actions.each do |action|
-          execute_action_simulation(action)
-        end
-        
-        # Add some random processing time to simulate real browser behavior
-        sleep(rand(0.1..0.5))
-        
-        duration = (Time.now - start_time) * 1000 # Convert to milliseconds
-        
-        {
-          success: response.code == '200',
-          duration: duration,
-          status_code: response.code.to_i,
-          title: "Simulated Page - #{url}",
-          content_length: response.body.length,
-          url: url
-        }
-      rescue => e
-        duration = (Time.now - start_time) * 1000
-        {
-          success: false,
-          duration: duration,
-          error: e.message,
-          url: url
-        }
-      end
-    end
-
-    def run_concurrent_tasks(concurrency_level, urls, actions, repetitions)
-      puts "Running #{concurrency_level} concurrent browsers with #{repetitions} repetitions each..."
-      
-      # Create contexts
-      contexts = concurrency_level.times.map { create_context }
-      
-      # Prepare tasks
-      tasks = []
-      contexts.each_with_index do |context, context_index|
-        repetitions.times do |rep_index|
-          url = urls[context_index % urls.length]
-          tasks << {
-            context: context,
-            url: url,
-            actions: actions,
-            context_index: context_index,
-            repetition: rep_index
-          }
-        end
-      end
-      
-      # Run tasks concurrently using threads
+    def run_concurrent_tasks(urls, concurrency_level)
       results = []
-      threads = tasks.map do |task|
-        Thread.new do
-          result = run_task(task[:context], task[:url], task[:actions])
-          result.merge(
-            context_index: task[:context_index],
-            repetition: task[:repetition]
-          )
+      threads = []
+      
+      urls.each_with_index do |url, index|
+        break if index >= concurrency_level
+        
+        threads << Thread.new do
+          run_single_task(url)
         end
       end
       
-      threads.each { |thread| results << thread.value }
+      threads.each(&:join)
+      
+      # Collect results from threads
+      threads.each do |thread|
+        results << thread.value if thread.value
+      end
+      
       results
-    end
-
-    def cleanup
-      @contexts.clear
-      puts "Cleaned up browser contexts"
     end
 
     private
 
-    def execute_action_simulation(action)
-      case action
-      when Hash
-        if action[:wait_for]
-          # Simulate waiting for selector
-          sleep(rand(0.1..0.3))
-        elsif action[:click]
-          # Simulate clicking
-          sleep(rand(0.05..0.15))
-        elsif action[:screenshot]
-          # Simulate screenshot
-          sleep(rand(0.2..0.4))
-        elsif action[:text]
-          # Simulate text extraction
-          sleep(rand(0.05..0.1))
-        end
-      when String
-        # Simple selector wait simulation
-        sleep(rand(0.1..0.3))
+    def run_single_task(url)
+      start_time = Time.now
+      
+      # Safety check before making request
+      unless @safety_manager.can_make_request(url)
+        return {
+          url: url,
+          success: false,
+          error: 'Safety limit exceeded',
+          duration_ms: 0,
+          timestamp: Time.now.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+        }
       end
+      
+      @safety_manager.record_request_start
+      
+      begin
+        result = fetch_url(url)
+        result[:duration_ms] = ((Time.now - start_time) * 1000).round(2)
+        result[:timestamp] = Time.now.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+        result
+      rescue => e
+        {
+          url: url,
+          success: false,
+          error: e.message,
+          duration_ms: ((Time.now - start_time) * 1000).round(2),
+          timestamp: Time.now.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+        }
+      ensure
+        @safety_manager.record_request_end
+      end
+    end
+
+    def fetch_url(url)
+      uri = URI(url)
+      
+      # Simulate browser automation
+      if @config.workload[:mode] == 'playwright'
+        simulate_playwright_actions(url)
+      else
+        # Simple HTTP request
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = uri.scheme == 'https'
+        http.open_timeout = @config.safety[:request_timeout_seconds] || 30
+        http.read_timeout = @config.safety[:request_timeout_seconds] || 30
+        
+        response = http.get(uri.path.empty? ? '/' : uri.path)
+        
+        {
+          url: url,
+          success: response.code.start_with?('2'),
+          status_code: response.code.to_i,
+          content_length: response.body.length,
+          duration_ms: 0 # Will be set by caller
+        }
+      end
+    end
+
+    def simulate_playwright_actions(url)
+      # Simulate Playwright browser automation
+      sleep(rand(0.1..0.5)) # Simulate page load time
+      
+      # Simulate some browser interactions
+      sleep(rand(0.05..0.2)) # Simulate DOM interaction
+      
+      # Simulate screenshot
+      sleep(rand(0.1..0.3)) # Simulate screenshot capture
+      
+      {
+        url: url,
+        success: true,
+        status_code: 200,
+        content_length: rand(1000..50000), # Simulate content size
+        duration_ms: 0 # Will be set by caller
+      }
     end
   end
 end

@@ -10,6 +10,8 @@ require_relative 'browser_benchmark_tool/degradation_engine'
 require_relative 'browser_benchmark_tool/report_generator'
 require_relative 'browser_benchmark_tool/chart_generator'
 require_relative 'browser_benchmark_tool/test_server'
+require_relative 'browser_benchmark_tool/safety_manager'
+require_relative 'browser_benchmark_tool/rate_limiter'
 
 # Main module for the Browser Benchmark Tool
 module BrowserBenchmarkTool

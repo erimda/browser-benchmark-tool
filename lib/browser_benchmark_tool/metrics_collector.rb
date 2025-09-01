@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'json'
+require 'time'
 
 module BrowserBenchmarkTool
   class MetricsCollector
@@ -36,7 +36,7 @@ module BrowserBenchmarkTool
       successful_tasks = results.select { |r| r[:success] }
       failed_tasks = results.reject { |r| r[:success] }
       
-      durations = successful_tasks.map { |r| r[:duration] }
+      durations = successful_tasks.map { |r| r[:duration_ms] || r[:duration] || 0 }
       
       sample = {
         timestamp: Time.now.strftime('%Y-%m-%dT%H:%M:%S.%LZ'),

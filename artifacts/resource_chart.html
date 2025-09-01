@@ -7,7 +7,7 @@
 <body>
   <div id="resource-chart"></div>
   <script>
-    var traces = [{"x":[1,2],"y":[44.2,30.3],"type":"scatter","mode":"lines+markers","name":"CPU Usage","line":{"color":"#2ca02c"}},{"x":[1,2],"y":[38.7,53.1],"type":"scatter","mode":"lines+markers","name":"Memory Usage","line":{"color":"#9467bd"}}];
+    var traces = [{"x":[1,1,2,2,4,4,8,8,16,16,32,32],"y":[45.8,24.8,43.9,39.8,36.0,26.6,21.5,28.6,35.1,32.1,20.8,32.4],"type":"scatter","mode":"lines+markers","name":"CPU Usage","line":{"color":"#2ca02c"}},{"x":[1,1,2,2,4,4,8,8,16,16,32,32],"y":[54.0,42.4,47.7,41.8,55.0,54.2,40.7,42.6,46.5,49.2,48.3,43.5],"type":"scatter","mode":"lines+markers","name":"Memory Usage","line":{"color":"#9467bd"}}];
     var layout = {"title":"Resource Usage vs Concurrency","xaxis":{"title":"Concurrency Level"},"yaxis":{"title":"Usage (%)"},"showlegend":true};
     Plotly.newPlot('resource-chart', traces, layout);
   </script>
