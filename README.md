@@ -214,16 +214,60 @@ The tool includes several safety mechanisms:
 
 ### Running Tests
 
+The project uses a multi-tier testing strategy to balance thoroughness with execution speed:
+
+#### 🚀 Fast Unit Tests (~1-2 seconds)
 ```bash
-# Run all tests
+# Run only fast unit tests (default)
 bundle exec rspec
 
-# Run specific test file
-bundle exec rspec spec/browser_benchmark_tool/benchmark_spec.rb
-
-# Run tests with progress output
-bundle exec rspec --format progress
+# Run specific unit test files
+bundle exec rspec spec/browser_benchmark_tool/benchmark_unit_spec.rb
+bundle exec rspec spec/browser_benchmark_tool/browser_automation_unit_spec.rb
 ```
+
+#### 🔧 Component Tests (~5-10 seconds)
+```bash
+# Run component tests
+bundle exec rspec spec/browser_benchmark_tool/test_server_spec.rb
+bundle exec rspec spec/browser_benchmark_tool/safety_manager_spec.rb
+```
+
+#### 🔗 Integration Tests (~30-60 seconds)
+```bash
+# Run integration tests
+bundle exec rspec spec/browser_benchmark_tool/benchmark_integration_spec.rb
+```
+
+#### 📊 Performance Tests (~2-3 minutes)
+```bash
+# Run performance tests
+bundle exec rspec spec/browser_benchmark_tool/benchmark_performance_spec.rb
+```
+
+#### 🎯 Test Type Selection
+```bash
+# Run by test type
+bundle exec rspec --tag fast        # Unit tests only
+bundle exec rspec --tag component   # Component tests only
+bundle exec rspec --tag slow        # Integration tests only
+bundle exec rspec --tag performance # Performance tests only
+
+# Run all tests
+RUN_ALL_TESTS=1 bundle exec rspec
+
+# Run specific test types
+RUN_SLOW_TESTS=1 bundle exec rspec      # Include integration tests
+RUN_PERFORMANCE_TESTS=1 bundle exec rspec  # Include performance tests
+```
+
+#### 📁 Test File Naming Convention
+- `*_unit_spec.rb` - Unit tests with mocked dependencies
+- `*_spec.rb` - Component tests (default)
+- `*_integration_spec.rb` - Integration tests
+- `*_performance_spec.rb` - Performance tests
+
+> 📖 **Detailed Testing Guide**: See [TESTING.md](TESTING.md) for comprehensive testing documentation, troubleshooting, and advanced usage examples.
 
 ### Code Quality
 
@@ -240,11 +284,25 @@ bundle exec rubocop lib/browser_benchmark_tool/benchmark.rb
 
 ### Test Performance
 
-The test suite is optimized for fast execution:
+The test suite uses a multi-tier approach for optimal development workflow:
 
-- **Before**: ~50 minutes runtime
-- **After**: ~3 minutes runtime (94% improvement)
-- All tests passing (88 examples, 0 failures, 1 pending)
+#### 🚀 Development Speed
+- **Unit Tests**: ~1-2 seconds (instant feedback)
+- **Component Tests**: ~5-10 seconds (component validation)
+- **Integration Tests**: ~30-60 seconds (workflow validation)
+- **Performance Tests**: ~2-3 minutes (optimization validation)
+
+#### 📊 Test Coverage
+- **Total Tests**: 47 examples across all test types
+- **Unit Tests**: 27 examples (fast, mocked dependencies)
+- **Integration Tests**: 20 examples (real workflows)
+- **All tests passing** with comprehensive coverage
+
+#### 🎯 Development Workflow
+1. **During Development**: Run unit tests for instant feedback
+2. **Before Committing**: Run component tests for integration validation
+3. **Before Release**: Run all tests for comprehensive validation
+4. **CI/CD Pipeline**: Different test types for different stages
 
 ## Contributing
 
