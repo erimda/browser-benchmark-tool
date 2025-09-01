@@ -469,6 +469,7 @@ The test suite uses a multi-tier approach for optimal development workflow:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 The MIT License is a permissive license that allows for:
+
 - Commercial use
 - Modification
 - Distribution
