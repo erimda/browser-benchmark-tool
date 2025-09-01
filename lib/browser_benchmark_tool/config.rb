@@ -26,12 +26,12 @@ module BrowserBenchmarkTool
           { wait_for: 'h1' },
           { screenshot: false }
         ],
-        per_browser_repetitions: 5
+        per_browser_repetitions: 3 # Reduced from 5 to save time
       }
       config.ramp = {
         strategy: 'exponential',
-        levels: [1, 2, 4, 8, 16, 32],
-        min_level_seconds: 45
+        levels: [1, 2, 4, 8, 16], # Removed 32 to save time
+        min_level_seconds: 30 # Reduced from 45 to save time
       }
       config.thresholds = {
         latency_multiplier_x: 2.0,
@@ -46,7 +46,8 @@ module BrowserBenchmarkTool
       config.output = {
         dir: './artifacts',
         formats: ['jsonl', 'csv', 'md'],
-        charts: true
+        charts: true,
+        max_runtime_minutes: 20 # Added time limit
       }
       config.safety = {
         robots_txt_respect: true,
@@ -89,7 +90,8 @@ module BrowserBenchmarkTool
       config.output = {
         dir: options[:out_dir],
         formats: ['jsonl', 'csv', 'md'],
-        charts: true
+        charts: true,
+        max_runtime_minutes: 20
       }
       config.safety = {
         robots_txt_respect: true,
@@ -131,7 +133,7 @@ module BrowserBenchmarkTool
     private
 
     def self.parse_ramp_strategy(ramp_str)
-      return { strategy: 'exponential', levels: [1, 2, 4, 8, 16, 32] } unless ramp_str
+      return { strategy: 'exponential', levels: [1, 2, 4, 8, 16] } unless ramp_str
 
       case ramp_str
       when /^exp:(.+)$/
@@ -145,7 +147,7 @@ module BrowserBenchmarkTool
         levels = $1.split(',').map(&:to_i)
         { strategy: 'custom', levels: levels }
       else
-        { strategy: 'exponential', levels: [1, 2, 4, 8, 16, 32] }
+        { strategy: 'exponential', levels: [1, 2, 4, 8, 16] }
       end
     end
   end

@@ -2,6 +2,7 @@
 
 require 'json'
 require 'fileutils'
+require_relative 'chart_generator'
 
 module BrowserBenchmarkTool
   class ReportGenerator
@@ -11,6 +12,7 @@ module BrowserBenchmarkTool
       @config = config
       @samples = samples
       @degradation_engine = degradation_engine
+      @chart_generator = ChartGenerator.new(config, samples)
     end
 
     def generate_summary
@@ -40,6 +42,9 @@ module BrowserBenchmarkTool
         - **CPU Threshold:** #{(config.thresholds[:cpu_utilization] * 100).round(1)}%
         - **Memory Threshold:** #{(config.thresholds[:memory_utilization] * 100).round(1)}%
         - **Error Rate Threshold:** #{(config.thresholds[:error_rate] * 100).round(1)}%
+        
+        ## Charts
+        #{generate_charts_section}
       MARKDOWN
     end
 
@@ -110,6 +115,11 @@ module BrowserBenchmarkTool
       # Save CSV data
       File.write(File.join(output_dir, 'metrics.csv'), export_csv)
       
+      # Save charts if enabled
+      if config.output[:charts]
+        @chart_generator.save_charts
+      end
+      
       puts "Reports saved to: #{output_dir}"
     end
 
@@ -119,6 +129,20 @@ module BrowserBenchmarkTool
       else
         samples.map { |s| s[:level] }.max || 0
       end
+    end
+
+    private
+
+    def generate_charts_section
+      return 'Charts disabled in configuration.' unless config.output[:charts]
+      
+      <<~MARKDOWN
+        Interactive charts have been generated:
+        - [Latency Chart](latency_chart.html) - Shows p50, p95, p99 latency vs concurrency
+        - [Resource Chart](resource_chart.html) - Shows CPU and memory usage vs concurrency
+        - [Error Rate Chart](error_rate_chart.html) - Shows error rates vs concurrency
+        - [Combined Chart](combined_chart.html) - All metrics in one comprehensive view
+      MARKDOWN
     end
   end
 end
