@@ -4,7 +4,7 @@ require 'yaml'
 
 module BrowserBenchmarkTool
   class Config
-    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety
+    attr_accessor :workload, :ramp, :thresholds, :sampling, :output, :safety, :memory_leak
 
     def initialize
       @workload = {}
@@ -13,6 +13,7 @@ module BrowserBenchmarkTool
       @sampling = {}
       @output = {}
       @safety = {}
+      @memory_leak = {}
     end
 
     def self.default
@@ -56,6 +57,13 @@ module BrowserBenchmarkTool
         max_total_requests: 100
       }
 
+      config.memory_leak = {
+        enabled: true,
+        threshold_mb: 100,
+        check_interval_requests: 10,
+        max_memory_growth_percent: 20
+      }
+
       config
     end
 
@@ -67,6 +75,7 @@ module BrowserBenchmarkTool
       config.sampling = hash['sampling'] || {}
       config.output = hash['output'] || {}
       config.safety = hash['safety'] || {}
+      config.memory_leak = hash['memory_leak'] || {}
       config
     end
 
@@ -127,7 +136,8 @@ module BrowserBenchmarkTool
         'thresholds' => thresholds,
         'sampling' => sampling,
         'output' => output,
-        'safety' => safety
+        'safety' => safety,
+        'memory_leak' => memory_leak
       }.to_yaml
     end
 

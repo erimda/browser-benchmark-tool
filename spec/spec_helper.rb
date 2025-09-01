@@ -67,6 +67,7 @@ RSpec.configure do |config|
       config.filter_run_excluding :playwright unless ENV['RUN_PLAYWRIGHT_TESTS']
   config.filter_run_excluding :real_metrics unless ENV['RUN_REAL_METRICS_TESTS']
   config.filter_run_excluding :context_optimization unless ENV['RUN_CONTEXT_OPTIMIZATION_TESTS']
+  config.filter_run_excluding :memory_leak unless ENV['RUN_MEMORY_LEAK_TESTS']
 
     # Default to running only fast tests
     config.filter_run :fast

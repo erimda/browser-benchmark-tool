@@ -4,6 +4,7 @@ require 'net/http'
 require 'uri'
 require 'json'
 require_relative 'safety_manager'
+require_relative 'memory_leak_detector'
 
 module BrowserBenchmarkTool
   class BrowserAutomation
@@ -12,6 +13,7 @@ module BrowserBenchmarkTool
       def initialize(config)
     @config = config
     @safety_manager = SafetyManager.new(config)
+    @memory_leak_detector = MemoryLeakDetector.new(config)
     @context_pool = []
     @context_pool_mutex = Mutex.new
     @max_context_pool_size = config.workload[:max_context_pool_size] || 10
@@ -59,6 +61,14 @@ module BrowserBenchmarkTool
     @execution&.stop
   end
 
+  def get_memory_leak_stats
+    @memory_leak_detector.get_memory_stats
+  end
+
+  def get_memory_leak_recommendations
+    @memory_leak_detector.get_leak_recommendations
+  end
+
   # Public method for testing
   def run_single_task(url)
     start_time = Time.now
@@ -75,6 +85,7 @@ module BrowserBenchmarkTool
     end
 
     @safety_manager.record_request_start
+    @memory_leak_detector.increment_request_count
 
     begin
       result = fetch_url(url)
@@ -91,6 +102,18 @@ module BrowserBenchmarkTool
       }
     ensure
       @safety_manager.record_request_end
+      
+      # Check for memory leaks periodically
+      if @memory_leak_detector.should_check_memory
+        current_memory = @memory_leak_detector.get_current_memory_usage
+        @memory_leak_detector.record_memory_usage(current_memory)
+        
+        # Log warning if memory leak detected
+        if @memory_leak_detector.check_for_leaks
+          puts "⚠️  Memory leak detected! Current usage: #{current_memory.round(1)}MB"
+          puts "   Recommendations: #{@memory_leak_detector.get_leak_recommendations.join(', ')}"
+        end
+      end
     end
   end
 
