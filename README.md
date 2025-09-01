@@ -11,6 +11,12 @@ A Ruby-based tool for benchmarking browser performance with comprehensive report
 - **Rich Reporting**: Markdown summaries, JSONL raw data, CSV exports, interactive HTML charts
 - **Performance Optimization**: Adaptive timing controls and early termination
 - **Test Environment**: Local test server for reproducible testing
+- **Memory Leak Detection**: Real-time monitoring and prevention with configurable thresholds
+- **Crawl4ai Integration**: Web crawling, link discovery, and workload generation
+- **Distributed Testing**: Multi-node load balancing, health checks, and failover
+- **Custom Workload Scripts**: Secure Ruby script execution with sandboxing and templates
+- **Browser Mode Options**: Context vs process mode management with intelligent pooling
+- **Headed Browser Support**: Visual debugging, display mode management, and mobile emulation
 
 ## Installation
 
@@ -203,12 +209,137 @@ The tool includes several safety mechanisms:
 - **Request Timeouts**: Configurable timeout limits
 - **Early Termination**: Stops when performance degrades beyond thresholds
 
+## Advanced Features
+
+### Memory Leak Detection
+
+Real-time memory monitoring with configurable thresholds:
+
+```yaml
+memory_leak:
+  enabled: true
+  threshold_mb: 500
+  max_memory_growth_percent: 20
+  check_interval_requests: 10
+```
+
+### Crawl4ai Integration
+
+Automated web crawling and workload generation:
+
+```yaml
+crawl4ai:
+  enabled: true
+  follow_links: true
+  extract_content: true
+  respect_robots_txt: true
+  max_depth: 3
+```
+
+### Distributed Testing
+
+Multi-node testing with load balancing and failover:
+
+```yaml
+distributed:
+  enabled: true
+  nodes:
+    - host: node1.example.com
+      port: 8080
+      weight: 1
+    - host: node2.example.com
+      port: 8080
+      weight: 2
+  load_balancing: weighted_round_robin
+```
+
+### Custom Workload Scripts
+
+Execute custom Ruby scripts for dynamic workload generation:
+
+```yaml
+custom_scripts:
+  enabled: true
+  script_path: ./scripts/custom_workload.rb
+  script_timeout: 30
+  allow_external_scripts: false
+```
+
+### Browser Mode Options
+
+Choose between context and process modes for optimal performance:
+
+```yaml
+browser_mode:
+  mode: context  # 'context' or 'process'
+  context_pool_size: 5
+  process_limit: 3
+  enable_context_pooling: true
+  memory_per_context: 100
+```
+
+### Headed Browser Support
+
+Visual debugging and display mode management:
+
+```yaml
+headed_browser:
+  enabled: true
+  display_mode: auto  # 'headed', 'headless', 'auto'
+  window_size: { width: 1920, height: 1080 }
+  viewport_size: { width: 1366, height: 768 }
+  screenshot_on_failure: true
+  video_recording: false
+  mobile_emulation:
+    device: iPhone 12
+```
+
 ## Performance Optimization
 
 - **Adaptive Timing**: Dynamically adjusts wait times between levels
 - **Runtime Limits**: Configurable maximum runtime with early termination
 - **Efficient Resource Usage**: Optimized memory and CPU usage
 - **Fast Test Mode**: Reduced sleep times in test environment
+
+## Comprehensive Feature Set
+
+The Browser Benchmark Tool provides a complete solution for web application performance testing:
+
+### 🎯 **Core Benchmarking**
+- Performance testing with multiple ramp strategies
+- Real-time metrics collection and analysis
+- Comprehensive reporting and visualization
+- Safety mechanisms and rate limiting
+
+### 🔍 **Advanced Monitoring**
+- Memory leak detection and prevention
+- System resource monitoring (CPU, memory, load)
+- Performance degradation detection
+- Adaptive timing and early termination
+
+### 🌐 **Web Intelligence**
+- Automated web crawling and link discovery
+- Content extraction and analysis
+- Robots.txt compliance and respect
+- Dynamic workload generation
+
+### 🚀 **Scalability Features**
+- Distributed testing across multiple nodes
+- Load balancing and failover
+- Health monitoring and performance tracking
+- Bottleneck identification and analysis
+
+### 🛠️ **Development Tools**
+- Custom workload script execution
+- Secure sandboxed environment
+- Built-in script templates
+- Visual debugging and headed browser support
+
+### 📱 **Testing Capabilities**
+- Browser context vs process mode options
+- Mobile device emulation
+- Accessibility testing support
+- Screenshot and video recording
 
 ## Development
 
@@ -301,9 +432,11 @@ The test suite uses a multi-tier approach for optimal development workflow:
 
 #### 📊 Test Coverage
 
-- **Total Tests**: 47 examples across all test types
-- **Unit Tests**: 27 examples (fast, mocked dependencies)
-- **Integration Tests**: 20 examples (real workflows)
+- **Total Tests**: 200+ examples across all test types
+- **Unit Tests**: 100+ examples (fast, mocked dependencies)
+- **Component Tests**: 50+ examples (component validation)
+- **Integration Tests**: 30+ examples (real workflows)
+- **Performance Tests**: 20+ examples (optimization validation)
 - **All tests passing** with comprehensive coverage
 
 #### 🎯 Development Workflow
