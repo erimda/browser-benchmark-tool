@@ -16,6 +16,9 @@ gem 'playwright', '~> 0.1.1'
 gem 'sys-proctable', '~> 1.2'
 gem 'json', '~> 2.6'
 
+# Web server for testing
+gem 'sinatra', '~> 3.0'
+
 group :development do
   gem 'rubocop', '~> 1.50'
   gem 'rubocop-rspec', '~> 2.20'

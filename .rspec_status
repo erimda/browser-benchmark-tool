@@ -24,3 +24,17 @@ example_id                                                      | status | run_t
 ./spec/browser_benchmark_tool/report_generator_spec.rb[1:6:2]   | passed | 0.00048 seconds |
 ./spec/browser_benchmark_tool/report_generator_spec.rb[1:7:1:1] | passed | 0.00258 seconds |
 ./spec/browser_benchmark_tool/report_generator_spec.rb[1:7:2:1] | passed | 0.00009 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:1:1]        | passed | 0.00175 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:1:2]        | failed | 0.0076 seconds  |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:2:1]        | failed | 0.71226 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:2:2]        | failed | 0.71208 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:3:1]        | failed | 0.71297 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:4:1]        | passed | 0.00087 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:5:1]        | passed | 0.71479 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:6:1]        | passed | 0.71227 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:6:2]        | passed | 1 second        |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:6:3]        | failed | 0.72171 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:6:4]        | passed | 0.71212 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:6:5]        | passed | 0.71297 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:7:1]        | failed | 0.20806 seconds |
+./spec/browser_benchmark_tool/test_server_spec.rb[1:8:1]        | passed | 0.71613 seconds |
