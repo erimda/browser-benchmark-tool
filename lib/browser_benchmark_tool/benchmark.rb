@@ -3,6 +3,7 @@
 require_relative 'browser_automation'
 require_relative 'metrics_collector'
 require_relative 'degradation_engine'
+require_relative 'report_generator'
 
 module BrowserBenchmarkTool
   class Benchmark
@@ -23,6 +24,7 @@ module BrowserBenchmarkTool
       begin
         setup_browser
         run_benchmark_ramp
+        generate_reports
         generate_summary
       ensure
         cleanup_browser
@@ -88,6 +90,12 @@ module BrowserBenchmarkTool
       puts "  Tasks: #{tasks[:attempted]} attempted, #{tasks[:successful]} successful, #{tasks[:failed]} failed (#{(tasks[:error_rate] * 100).round(1)}% error rate)"
       puts "  Latency: p50=#{latency[:p50].round(2)}ms, p95=#{latency[:p95].round(2)}ms, p99=#{latency[:p99].round(2)}ms"
       puts "  Host: CPU=#{(host[:cpu_usage] * 100).round(1)}%, Memory=#{(host[:memory_usage] * 100).round(1)}%"
+    end
+
+    def generate_reports
+      puts "\nGenerating reports..."
+      report_generator = ReportGenerator.new(@config, @results, @degradation_engine)
+      report_generator.save_reports
     end
 
     def generate_summary
